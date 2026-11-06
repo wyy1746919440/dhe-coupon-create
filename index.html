@@ -596,7 +596,6 @@
     border-bottom:1px solid var(--border-l);
   }
   .pm-hd h3{margin:0;font-size:16px;font-weight:600;}
-  .pm-hd .pm-sub{font-size:12px;color:var(--text3);margin-left:10px;font-weight:400;}
   .pm-x{
     width:28px;height:28px;border:0;background:transparent;
     font-size:20px;line-height:1;color:var(--text3);cursor:pointer;border-radius:4px;
@@ -1274,7 +1273,7 @@
 <div class="pm-mask" id="pmMask">
   <div class="pm-dialog">
     <div class="pm-hd">
-      <h3>选择商品<span class="pm-sub" id="pmSub">未选与已选各自独立筛选</span></h3>
+      <h3>选择商品</h3>
       <button class="pm-x" id="pmClose" title="关闭">&times;</button>
     </div>
     <div class="pm-bd">
@@ -2207,16 +2206,6 @@
     S.fL = emptyF();
     S.fR = emptyF();
     clearF('pmL'); clearF('pmR');
-    if ($('pmSub')) {
-      $('pmSub').textContent = !pickTarget ? '未选与已选各自独立筛选'
-        : (pickTarget.kind === 'boxRowProd'
-            ? ('第 ' + (pickTarget.i + 1) + ' 档 · 可多选')
-            : (pickTarget.kind === 'simProdGroup'
-            ? ('第 ' + (pickTarget.g + 1) + ' 组 · 可多选，选中的商品共用该组优惠金额')
-            : (pickTarget.kind === 'simProdAll'
-                ? '可多选，回填到「商品限制」明细'
-                : ('第 ' + (pickTarget.i + 1) + ' 行 · 未选与已选各自独立筛选'))));
-    }
     render();
     $('pmMask').classList.add('open');
   }
