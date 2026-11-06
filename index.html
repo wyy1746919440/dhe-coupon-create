@@ -372,6 +372,7 @@
   .pgrp{display:grid;grid-template-columns:1fr 88px 84px;align-items:stretch;padding:4px 0;}
   .pgrp.nop{grid-template-columns:1fr 84px;}
   .pgrp + .pgrp{border-top:1px dashed #e8ebef;}
+  .pflat{padding:3px 0;}
   .pchips{display:flex;flex-wrap:wrap;gap:4px;padding:2px 8px;min-height:24px;align-content:flex-start;}
   .pchip{
     display:inline-flex;align-items:center;gap:5px;height:22px;padding:0 7px;
@@ -1840,7 +1841,22 @@
     }
     if (sim.limit === 'product') {
       var withPrice = (ctype() === 'voucher');
-      var gs = simGroups(), out = '';
+      var gs = simGroups();
+      /* 折扣券：折扣与上限对全部指定商品一致，分组无意义 → 单一扁平多选区，无「新增/删除」 */
+      if (!withPrice) {
+        var flatItems = [];
+        gs.forEach(function (g, gi) {
+          g.items.forEach(function (p, k) { flatItems.push({ p: p, gi: gi, k: k }); });
+        });
+        var flat = flatItems.map(function (o) {
+          return '<span class="pchip" data-pickg="0" data-pickall="1" title="' + esc(o.p.name + '（' + o.p.spec + '）') + '">' +
+                   '<span class="pc-t">' + o.p.name + '</span>' +
+                   '<i data-delc="' + o.gi + ':' + o.k + '">&times;</i></span>';
+        }).join('');
+        if (!flat) flat = '<span class="pchip empty" data-pickg="0" data-pickall="1">+ 选择商品</span>';
+        return '<div class="pflat"><div class="pchips">' + flat + '</div></div>';
+      }
+      var out = '';
       gs.forEach(function (g, gi) {
         var chips = g.items.map(function (p, k) {
           return '<span class="pchip" data-pickg="' + gi + '" title="' + esc(p.name + '（' + p.spec + '）') + '">' +
@@ -1848,14 +1864,12 @@
                    '<i data-delc="' + gi + ':' + k + '">&times;</i></span>';
         }).join('');
         if (!g.items.length) chips = '<span class="pchip empty" data-pickg="' + gi + '">+ 选择商品</span>';
-        out += '<div class="pgrp' + (withPrice ? '' : ' nop') + '">' +
+        out += '<div class="pgrp">' +
                  '<div class="pchips">' + chips + '</div>' +
-                 (withPrice
-                   ? '<span class="pdprice">' +
-                       '<input class="tinp cutinp" data-cut="' + gi + '" style="width:52px;" value="' + esc(g.cut == null ? '' : g.cut) + '"' +
-                       ' title="' + (g.items.length > 1 ? ('这 ' + g.items.length + ' 个商品共用此优惠金额') : '该组优惠金额') + '">' +
-                       '<span class="unit">元</span></span>'
-                   : '') +
+                 '<span class="pdprice">' +
+                   '<input class="tinp cutinp" data-cut="' + gi + '" style="width:52px;" value="' + esc(g.cut == null ? '' : g.cut) + '"' +
+                   ' title="' + (g.items.length > 1 ? ('这 ' + g.items.length + ' 个商品共用此优惠金额') : '该组优惠金额') + '">' +
+                   '<span class="unit">元</span></span>' +
                  '<span class="pdops"><a data-newg="' + gi + '">新增</a><a data-delg="' + gi + '">删除</a></span>' +
                '</div>';
       });
@@ -1926,9 +1940,10 @@
         hs = ['单张优惠券', '使用条件', '商品限制', '指定商品', '优惠价格', '操作'];
         span = 3;
       } else {
-        cols = [110, 150, 160, 130, 0, 84];
-        hs = ['折扣', '金额上限', '使用条件', '商品限制', '指定商品', '操作'];
-        span = 2;
+        /* 折扣券：不分组，故无「操作」列 */
+        cols = [110, 150, 160, 130, 0];
+        hs = ['折扣', '金额上限', '使用条件', '商品限制', '指定商品'];
+        span = 0;
       }
     } else if (sim.limit === 'brand') {
       cols = isV ? [150, 216, 170, 326] : [130, 150, 216, 160, 206];
@@ -1989,7 +2004,8 @@
     }
     var pick = e.target.closest('[data-pickg]');
     if (pick) {
-      pickTarget = { kind:'simProdGroup', g: +pick.dataset.pickg };
+      /* 折扣券的标签带 data-pickall：整块替换（不分组的单一商品集合） */
+      pickTarget = pick.dataset.pickall ? { kind:'simProdAll' } : { kind:'simProdGroup', g: +pick.dataset.pickg };
       openModal(false);
       return;
     }
@@ -2253,8 +2269,8 @@
       $('cRate').style.display = (t === 'discount') ? '' : 'none';
       $('cCap').style.display = (t === 'discount') ? '' : 'none';
       $('sTip').innerHTML = (t === 'voucher')
-        ? '商品限制选「指定品牌」或「指定商品」后，右侧出现对应明细列，可逐条新增；留「全部商品」则对所有商品生效。'
-        : '商品限制选「指定品牌」或「指定商品」后，右侧出现对应明细列，可逐条新增；金额上限留空表示不封顶。';
+        ? '商品限制选「指定商品」后，右侧出现明细列，可分组新增、每组共用一笔优惠金额；全部商品则对所有商品生效。'
+        : '商品限制选「指定商品」后，右侧出现明细列，一次多选即可（折扣对所选商品统一生效）；金额上限留空表示不封顶。';
       renderSim();
     }
     if (t === 'box') renderTable();
@@ -2268,7 +2284,7 @@
       if (sim.limit === 'brand' && !sim.brands.length) return toast('请选择品牌');
       if (sim.limit === 'product') {
         if (!simFlat().length) return toast('请选择商品');
-        if (sim.groups.some(function (g) { return !g.items.length; })) return toast('请选择商品（有未选择的行）');
+        if (t === 'voucher' && sim.groups.some(function (g) { return !g.items.length; })) return toast('请选择商品（有未选择的行）');
       }
       var cv = parseFloat($('condInp').value);
       if (!$('condInp').value.trim()) { mark($('condInp')); return toast('请填写使用条件'); }
