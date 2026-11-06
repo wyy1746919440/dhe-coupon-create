@@ -1,0 +1,2348 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>创建优惠券 · 大黄鹅运营后台</title>
+<style>
+  :root{
+    --blue:#1677ff;
+    --blue-l:#e8f1ff;
+    --blue-chip:#eef4ff;
+    --text:#303133;
+    --text2:#5b6472;
+    --text3:#909399;
+    --text4:#b9bfc9;
+    --border:#dcdfe6;
+    --border-l:#eaedf2;
+    --bg-side:#f7f8fa;
+    --red:#f56c6c;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    font-size:13px;
+    color:var(--text);
+    background:#fff;
+    -webkit-font-smoothing:antialiased;
+  }
+  svg{display:block;}
+
+  /* ============ 顶部栏 ============ */
+  .topbar{
+    height:60px;
+    display:flex;align-items:center;
+    background:#fff;
+    border-bottom:1px solid var(--border-l);
+    padding:0 24px 0 18px;
+    position:sticky;top:0;z-index:30;
+  }
+  .brand{display:flex;align-items:center;gap:9px;margin-right:30px;}
+  .brand .logo{
+    width:32px;height:32px;border-radius:50%;
+    background:#ffd233;
+    display:flex;align-items:center;justify-content:center;
+    flex:none;overflow:hidden;
+  }
+  .brand .name{font-size:17px;font-weight:600;letter-spacing:.5px;color:#1f2329;}
+
+  .topnav{display:flex;align-items:center;height:100%;gap:6px;}
+  .topnav a{
+    height:60px;line-height:60px;
+    padding:0 18px;
+    font-size:15px;color:var(--text2);
+    text-decoration:none;
+    position:relative;
+  }
+  .topnav a:hover{color:var(--blue);}
+  .topnav a.on{color:var(--blue);font-weight:500;}
+  .topnav a.on::after{
+    content:"";position:absolute;left:18px;right:18px;bottom:0;
+    height:2px;background:var(--blue);border-radius:1px 1px 0 0;
+  }
+
+  .topright{margin-left:auto;display:flex;align-items:center;gap:20px;}
+  .ico-btn{
+    width:30px;height:30px;border:0;background:transparent;
+    color:#5b6472;display:flex;align-items:center;justify-content:center;
+    cursor:pointer;border-radius:5px;padding:0;
+  }
+  .ico-btn:hover{background:#f4f6f9;color:var(--blue);}
+  .user{display:flex;align-items:center;gap:7px;cursor:pointer;padding-left:4px;}
+  .avatar{
+    width:28px;height:28px;border-radius:50%;
+    background:linear-gradient(135deg,#5b8ff9,#3a6fd8);
+    color:#fff;font-size:12px;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .user .un{font-size:13px;color:var(--text);}
+  .user .caret{color:var(--text3);}
+
+  /* ============ 布局 ============ */
+  .layout{display:flex;align-items:stretch;min-height:calc(100vh - 60px);}
+
+  .side{
+    width:150px;flex:none;
+    background:var(--bg-side);
+    border-right:1px solid var(--border-l);
+    padding:10px 0 24px;
+  }
+  .nav-item{
+    display:flex;align-items:center;gap:7px;
+    height:36px;padding:0 10px 0 14px;
+    font-size:13px;color:var(--text2);
+    cursor:pointer;user-select:none;
+    white-space:nowrap;
+  }
+  .nav-item:hover{color:var(--blue);}
+  .nav-item .nic{width:14px;height:14px;color:#8b95a5;flex:none;display:flex;align-items:center;justify-content:center;}
+  .nav-item .caret{margin-left:auto;color:#a8b0bd;display:flex;}
+  .nav-sub{padding-bottom:3px;}
+  .nav-sub .nav-item{padding-left:30px;height:34px;color:#606a78;}
+  .nav-sub .nav-item.on{
+    background:var(--blue-l);
+    color:var(--blue);
+    font-weight:500;
+    border-right:2px solid var(--blue);
+  }
+
+  .main{
+    flex:1;min-width:0;
+    padding:0 32px 48px 18px;
+    background:#fff;
+  }
+  .crumb{
+    height:44px;display:flex;align-items:center;
+    font-size:13px;color:var(--text3);gap:4px;
+  }
+  .crumb .lb{color:var(--text2);}
+  .crumb a{color:var(--text2);text-decoration:none;}
+  .crumb a:hover{color:var(--blue);}
+  .crumb .cur{color:#6b7686;}
+
+  .sec{margin-bottom:26px;}
+  .sec-hd{
+    display:flex;align-items:center;gap:8px;
+    height:36px;
+    font-size:15px;font-weight:600;color:#1f2329;
+  }
+  .sec-hd::before{
+    content:"";width:3px;height:16px;border-radius:1px;background:var(--blue);
+  }
+
+  .form{padding-left:4px;}
+  .row{display:flex;align-items:flex-start;margin-bottom:5px;min-height:32px;}
+  .lb{
+    width:104px;flex:none;
+    font-size:13px;color:var(--text2);
+    line-height:32px;
+    white-space:nowrap;
+  }
+  .lb.req::before{content:"*";color:var(--red);margin-right:4px;font-family:SimSun,serif;}
+  .ctl{display:flex;align-items:center;gap:8px;min-height:32px;flex-wrap:wrap;}
+
+  .inp{
+    height:32px;
+    border:1px solid var(--border);
+    border-radius:4px;
+    padding:0 10px;
+    font-size:13px;color:var(--text);
+    outline:none;background:#fff;
+    transition:border-color .15s, box-shadow .15s;
+  }
+  .inp::placeholder{color:var(--text4);}
+  .inp:hover{border-color:#c3cbd8;}
+  .inp:focus{border-color:var(--blue);box-shadow:0 0 0 2px rgba(22,119,255,.1);}
+  .w-name{width:232px;}
+  .w-flex{width:272px;}
+  .w-num{width:132px;}
+  .w-money{width:162px;}
+  .w-sm{width:58px;text-align:center;padding:0 6px;}
+
+  .counter{font-size:13px;color:var(--text3);margin-left:2px;}
+
+  .radio{
+    display:inline-flex;align-items:center;gap:7px;
+    font-size:13px;color:var(--text);
+    margin-right:24px;cursor:pointer;line-height:32px;
+    white-space:nowrap;
+  }
+  .radio input{
+    appearance:none;-webkit-appearance:none;
+    width:16px;height:16px;margin:0;
+    border:1px solid #c8cfda;border-radius:50%;
+    background:#fff;position:relative;cursor:pointer;
+    transition:.15s;flex:none;
+  }
+  .radio input:hover{border-color:var(--blue);}
+  .radio input:checked{border-color:var(--blue);}
+  .radio input:checked::after{
+    content:"";position:absolute;left:50%;top:50%;
+    width:7px;height:7px;margin:-3.5px 0 0 -3.5px;
+    border-radius:50%;background:var(--blue);
+  }
+  .radio:has(input:checked){color:var(--blue);}
+  .radio .txt{line-height:1;}
+  .info-ic{color:#b0b8c4;margin-left:1px;display:flex;}
+  .info-ic:hover{color:var(--blue);}
+
+  .date{
+    width:118px;height:32px;
+    border:1px solid var(--border);border-radius:4px;
+    display:flex;align-items:center;gap:6px;
+    padding:0 8px;background:#fff;color:var(--text4);
+    cursor:pointer;
+  }
+  .date:hover{border-color:#c3cbd8;}
+  .date span{flex:1;overflow:hidden;white-space:nowrap;}
+  .date svg{color:#b0b8c4;flex:none;}
+  .tilde{color:var(--text3);margin:0 3px;}
+  .date.on{border-color:#b9c6d8;color:var(--text);}
+
+  /* 日期选择浮层 */
+  .dp{
+    position:fixed;z-index:90;width:238px;padding:8px;
+    background:#fff;border:1px solid var(--border);border-radius:6px;
+    box-shadow:0 8px 24px rgba(16,24,40,.14);display:none;
+  }
+  .dp.open{display:block;}
+  .dp-hd{display:flex;align-items:center;justify-content:space-between;height:28px;padding:0 2px;}
+  .dp-hd b{font-size:13px;font-weight:600;color:var(--text);}
+  .dp-nav{width:24px;height:24px;border-radius:4px;display:flex;align-items:center;justify-content:center;color:var(--text3);cursor:pointer;user-select:none;}
+  .dp-nav:hover{background:#f1f5fa;color:var(--blue);}
+  .dp-w{display:grid;grid-template-columns:repeat(7,1fr);margin-top:4px;}
+  .dp-w span{text-align:center;font-size:11px;color:var(--text4);height:22px;line-height:22px;}
+  .dp-g{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;}
+  .dp-g i{
+    height:26px;display:flex;align-items:center;justify-content:center;
+    font-size:12px;font-style:normal;color:var(--text);border-radius:4px;cursor:pointer;
+  }
+  .dp-g i:hover{background:#eef4ff;color:var(--blue);}
+  .dp-g i.other{color:#c9d0da;}
+  .dp-g i.today{box-shadow:inset 0 0 0 1px var(--blue);color:var(--blue);}
+  .dp-g i.on{background:var(--blue);color:#fff;}
+  .dp-ft{display:flex;align-items:center;justify-content:space-between;margin-top:6px;padding-top:6px;border-top:1px solid #f0f2f5;}
+  .dp-ft a{font-size:12px;color:var(--blue);cursor:pointer;}
+  .dp-ft span{font-size:11px;color:var(--text4);}
+
+  .sel{
+    height:32px;min-width:170px;
+    border:1px solid var(--border);border-radius:4px;
+    display:inline-flex;align-items:center;justify-content:space-between;
+    gap:12px;padding:0 10px;background:#fff;
+    cursor:pointer;color:var(--text4);
+  }
+  .sel:hover{border-color:#c3cbd8;}
+  .sel .val{color:var(--text);}
+  .sel svg{color:#b0b8c4;flex:none;}
+  .sel.disabled{background:#f7f8fa;color:var(--text);cursor:default;}
+  .sel.disabled:hover{border-color:var(--border);}
+
+  .cond{display:flex;align-items:center;gap:8px;}
+  .chk-ic{
+    width:16px;height:16px;border-radius:50%;
+    background:#2fb344;color:#fff;
+    display:flex;align-items:center;justify-content:center;flex:none;
+  }
+  .cond .t{color:#2fb344;font-size:13px;}
+  .cond .suffix{color:var(--text2);font-size:13px;}
+  .cond .sep{color:#d5dbe4;margin:0 6px;}
+  .cond .inp{width:60px;text-align:center;padding:0 6px;}
+
+  .pick-line{display:flex;align-items:center;gap:14px;line-height:32px;}
+  .pick-line .cnt{color:var(--text2);}
+  .btn{
+    height:32px;padding:0 16px;
+    border:1px solid var(--border);border-radius:4px;
+    background:#fff;color:var(--text);
+    font-size:13px;cursor:pointer;
+    display:inline-flex;align-items:center;justify-content:center;
+    transition:.15s;
+  }
+  .btn:hover{border-color:var(--blue);color:var(--blue);}
+  .btn.primary{
+    background:var(--blue);border-color:var(--blue);color:#fff;
+    padding:0 20px;
+  }
+  .btn.primary:hover{background:#0f62e0;border-color:#0f62e0;color:#fff;}
+
+  .chips{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px;}
+  .chip{
+    display:inline-flex;align-items:center;gap:10px;
+    height:28px;padding:0 10px;
+    background:var(--blue-chip);
+    border-radius:3px;
+    color:var(--blue);font-size:13px;
+    white-space:nowrap;
+  }
+  .chip .x{
+    color:#7fa9ff;cursor:pointer;font-size:15px;line-height:1;
+    padding:0 1px;
+  }
+  .chip .x:hover{color:var(--blue);}
+
+  .unit{font-size:13px;color:var(--text2);}
+
+  /* 按箱优惠阶梯表 */
+  .tier{
+    width:862px;max-width:100%;
+    --rcols:214px 206px 168px 140px 96px;
+    border:1px solid var(--border);
+    border-radius:4px;
+    overflow-x:auto;overflow-y:hidden;
+    background:#fff;
+  }
+  .tier::-webkit-scrollbar{height:6px;}
+  .tier::-webkit-scrollbar-thumb{background:#dfe3ea;border-radius:3px;}
+  .tier-hd{
+    display:grid;
+    grid-template-columns:var(--rcols);
+    background:#f2f6fd;
+    border-bottom:1px solid var(--border);
+  }
+  .tier-hd span{
+    font-size:12px;color:var(--text2);
+    padding:9px 10px;
+    border-left:1px solid #e6ebf4;
+  }
+  .tier-hd span:first-child{border-left:0;}
+  .tier-row{
+    display:grid;
+    grid-template-columns:var(--rcols);
+    align-items:center;
+    border-bottom:1px solid #eef1f6;
+  }
+  .tier-row:last-child{border-bottom:0;}
+  .tier-row .cell{
+    display:flex;align-items:center;gap:6px;
+    padding:7px 10px;
+    border-left:1px solid #eef1f6;
+    min-width:0;
+  }
+  .tier-row .cell:first-child{border-left:0;}
+  .tinp{
+    height:26px;width:100%;min-width:0;
+    border:1px solid var(--border);border-radius:3px;
+    padding:0 7px;font-size:12px;color:var(--text);
+    outline:none;background:#fff;
+    transition:border-color .15s, box-shadow .15s;
+  }
+  .tinp::placeholder{color:var(--text4);}
+  .tinp:focus{border-color:var(--blue);box-shadow:0 0 0 2px rgba(22,119,255,.1);}
+  .tinp.num{width:54px;text-align:left;}
+  .range .tinp{width:64px;}
+  .tier-row .pre,.tier-row .unit,.tier-row .to{font-size:12px;color:var(--text2);white-space:nowrap;}
+  .tier-row .ops{justify-content:flex-start;gap:12px;}
+  .tier-row .ops a{color:var(--blue);cursor:pointer;font-size:12px;}
+  .tier-row .ops a:hover{text-decoration:underline;}
+  .tier-tip{
+    margin-top:8px;
+    font-size:12px;color:var(--text3);
+    line-height:20px;
+    max-width:862px;
+  }
+  .tier-tip b{color:var(--text);font-weight:600;}
+
+  /* ---------- 代金券 / 折扣券：单组规则表 ---------- */
+  .srule{--rcols:150px 216px 190px 1fr;width:862px;}
+  .srule .tier-row{align-items:flex-start;}
+  .srule .tier-row .cell{min-height:40px;padding:7px 10px;}
+  .srule .lsel{height:26px;}
+  .srule .dcell{flex-direction:column;align-items:stretch;gap:6px;padding:7px 10px;}
+  .srule .dcell.span2{grid-column:span 2;}
+  .srule .dcell.span3{grid-column:span 3;}
+  /* 按箱行内的商品限制 + 明细 */
+  .tier-row .cell.boxlim{flex-direction:column;align-items:stretch;gap:6px;}
+  .tier-row .cell.boxdetail{flex-direction:column;align-items:stretch;gap:4px;}
+  .msel.mini{min-height:26px;padding:1px 5px;max-width:236px;}
+  .msel.mini .chip{height:18px;font-size:11px;line-height:18px;padding:0 5px;}
+  .msel.mini .caret{width:8px;height:8px;}
+  .drow.sm{display:grid;grid-template-columns:1fr auto;align-items:center;column-gap:6px;height:24px;font-size:12px;}
+  .drow.sm .dt{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer;}
+  .drow.sm .dsp{max-width:86px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text3);font-size:11px;}
+  .drow.sm .dt:hover{color:var(--blue);}
+  .drow.sm .dops{display:flex;justify-content:flex-end;gap:8px;}
+  .drow.sm .dops a{color:var(--blue);font-size:11px;cursor:pointer;}
+  .drow.sm .dops a[data-bdel]{color:var(--text3);}
+  .drow.sm .dops a[data-bdel]:hover{color:#e54545;}
+  .drow{display:flex;align-items:center;gap:8px;height:26px;font-size:12px;color:var(--text);}
+  /* 明细：每组一行，商品以标签平铺（不再一行一个商品） */
+  #cDetail.dgroups{display:flex;flex-direction:column;padding:3px 0;}
+  .pgrp{display:grid;grid-template-columns:1fr 88px 84px;align-items:stretch;padding:4px 0;}
+  .pgrp.nop{grid-template-columns:1fr 84px;}
+  .pgrp + .pgrp{border-top:1px dashed #e8ebef;}
+  .pchips{display:flex;flex-wrap:wrap;gap:4px;padding:2px 8px;min-height:24px;align-content:flex-start;}
+  .pchip{
+    display:inline-flex;align-items:center;gap:5px;height:22px;padding:0 7px;
+    background:#eef3fd;color:#2b6cd4;border-radius:3px;font-size:12px;cursor:pointer;
+    max-width:100%;
+  }
+  .pchip:hover{background:#e2ebfa;}
+  .pc-t{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;}
+  .pchip i{font-style:normal;color:#8ba7d6;font-size:13px;line-height:1;flex:none;}
+  .pchip i:hover{color:#e54545;}
+  .pchip.empty{background:#f7f9fc;color:var(--text3);border:1px dashed var(--border);}
+  .pchip.empty:hover{color:var(--blue);border-color:#bcd3f5;background:#f2f7ff;}
+  .pdprice{display:flex;align-items:flex-start;justify-content:flex-end;gap:4px;padding:2px 8px;min-height:26px;border-left:1px dashed #dfe3e9;}
+  .pdops{display:flex;align-items:flex-start;justify-content:center;gap:10px;min-height:26px;padding-top:7px;border-left:1px dashed #dfe3e9;}
+  .pdops a{color:var(--blue);font-size:11px;cursor:pointer;}
+  .pdops a[data-delg]{color:var(--text3);}
+  .pdops a[data-delg]:hover{color:#e54545;}
+  .drow.prod{display:grid;grid-template-columns:1fr 84px 74px;align-items:center;column-gap:6px;}
+  .drow.prod.withprice{grid-template-columns:1fr 84px 74px 92px;}
+  .drow.prod .dt{min-width:0;}
+  .drow.prod .dsp{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text3);font-size:11px;}
+  .drow.prod .dops{text-align:right;display:flex;align-items:center;justify-content:flex-end;gap:8px;}
+  .drow.prod .dprice{display:flex;align-items:center;gap:4px;justify-content:flex-end;}
+  .drow.prod .dprice .unit{font-size:11px;color:var(--text3);}
+  .drow.prod .dprice .auto-ph{font-size:11px;color:var(--text4);}
+  .cutinp{height:24px;font-size:12px;}
+  .cuttip{margin-top:8px;font-size:12px;color:var(--text3);line-height:20px;max-width:862px;}
+  .cuttip b{color:var(--text);font-weight:600;}
+  .cuttip.warn{color:#d4380d;}
+  .cuttip.warn b{color:#d4380d;}
+  .drow.prod .dops a{color:var(--blue);cursor:pointer;font-size:12px;}
+  .drow.prod .dops a:hover{text-decoration:underline;}
+  .drow.prod .dops a[data-del]{color:var(--text3);}
+  .drow.prod .dops a[data-del]:hover{color:#e54545;}
+  .drow .dt{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;}
+  .drow .dt:hover{color:var(--blue);}
+  .drow .dt.pick{color:var(--blue);}
+
+  /* 品牌多选字段 */
+  .msel{
+    display:flex;flex-wrap:wrap;gap:4px;align-items:center;
+    min-height:26px;padding:2px 6px;
+    border:1px solid var(--border);border-radius:4px;background:#fff;
+    cursor:pointer;position:relative;
+  }
+  .msel:hover{border-color:#c3cbd8;}
+  .msel.on{border-color:#a9c8ff;background:#f7faff;}
+  .msel .ph{font-size:12px;color:var(--text4);line-height:20px;}
+  .msel .chip{
+    display:inline-flex;align-items:center;gap:4px;height:20px;padding:0 6px;
+    background:#eef4ff;color:var(--blue);border-radius:3px;font-size:12px;line-height:20px;
+  }
+  .msel .chip i{font-style:normal;cursor:pointer;color:#7ea6e8;}
+  .msel .chip i:hover{color:#e54545;}
+  .msel .caret{margin-left:auto;color:var(--text3);flex:none;}
+
+  .bmpop{
+    position:fixed;z-index:70;display:none;width:220px;
+    background:#fff;border:1px solid var(--border);border-radius:6px;
+    box-shadow:0 10px 28px rgba(20,28,44,.16);padding:6px 0;
+  }
+  .bmpop.open{display:block;}
+  .bmpop label{display:flex;align-items:center;gap:8px;height:30px;padding:0 12px;font-size:13px;cursor:pointer;}
+  .bmpop label:hover{background:#f5f8ff;}
+  .bmpop label .num{margin-left:auto;color:var(--text3);font-size:12px;}
+  .bmpop label input{accent-color:#2f6feb;cursor:pointer;}
+  .bmpop .bp-ft{display:flex;justify-content:space-between;align-items:center;padding:6px 12px 2px;border-top:1px solid var(--border-l);margin-top:4px;font-size:12px;color:var(--text3);}
+  .bmpop .bp-ft a{color:var(--blue);cursor:pointer;}
+  .drow .dsp{color:var(--text3);font-size:11px;}
+  .drow .dx{color:var(--text3);cursor:pointer;font-size:12px;flex:none;}
+  .drow .dx:hover{color:#e54545;}
+  .dempty{font-size:12px;color:var(--text4);height:26px;line-height:26px;}
+  .dsel{
+    flex:1;min-width:0;height:26px;
+    border:1px solid var(--border);border-radius:4px;background:#fff;
+    font-size:12px;color:var(--text);padding:0 4px;outline:none;
+  }
+  .dsel:hover{border-color:#c3cbd8;}
+  .dsel:focus{border-color:#a9c8ff;}
+  .sadd{margin-top:8px;}
+  .sadd a{color:var(--blue);font-size:12px;cursor:pointer;}
+  .sadd a:hover{text-decoration:underline;}
+
+  /* ---------- 行内商品限制：下拉选择 + 弹窗取数 ---------- */
+  .lsel{
+    display:flex;align-items:center;gap:4px;width:100%;
+    height:26px;padding:0 7px;
+    border:1px solid var(--border);border-radius:3px;background:#fff;
+    font-size:12px;color:var(--text2);cursor:pointer;
+  }
+  .lsel:hover{border-color:#c3cbd8;}
+  .lsel.on{border-color:#a9c8ff;background:#f5f9ff;color:var(--blue);}
+  .lsel .lsel-t{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .lsel svg{flex:none;color:var(--text3);}
+
+  .lmenu{
+    position:fixed;z-index:95;min-width:130px;padding:4px;
+    background:#fff;border:1px solid var(--border-l);border-radius:5px;
+    box-shadow:0 12px 30px rgba(24,37,64,.16);display:none;
+  }
+  .lmenu.open{display:block;}
+  .lmenu a{
+    display:flex;align-items:center;gap:5px;height:28px;padding:0 8px;
+    border-radius:3px;font-size:12px;color:var(--text);cursor:pointer;
+  }
+  .lmenu a:hover{background:#f5f8ff;color:var(--blue);}
+  .lmenu a .ic{width:12px;flex:none;color:var(--blue);font-size:11px;}
+
+  /* ---------- 商品限制字段（下拉触发） ---------- */
+  .fsel{
+    display:flex;align-items:center;justify-content:space-between;gap:6px;
+    width:240px;height:32px;padding:0 10px;
+    border:1px solid var(--border);border-radius:4px;background:#fff;
+    font-size:13px;color:var(--text);cursor:pointer;
+  }
+  .fsel:hover{border-color:#c3cbd8;}
+  .fsel.on{border-color:#a9c8ff;background:#f5f9ff;color:var(--blue);}
+  .fsel .fsel-t{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .fsel svg{flex:none;color:var(--text3);}
+
+  /* ---------- 选择商品小表格 ---------- */
+  .ptab{width:560px;max-width:100%;border:1px solid var(--border);border-radius:4px;overflow:hidden;background:#fff;}
+  .prow{
+    display:grid;grid-template-columns:44px 1fr 150px;align-items:center;
+    min-height:36px;padding:0 12px;column-gap:8px;
+    border-bottom:1px solid #f2f4f7;font-size:13px;color:var(--text);
+  }
+  .prow:last-child{border-bottom:0;}
+  .prow .pidx{font-size:12px;color:var(--text3);}
+  .prow .pmain{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .prow .pmain .spec{color:var(--text3);font-size:12px;margin-left:6px;}
+  .prow .pops{text-align:right;white-space:nowrap;}
+  .prow .pops a{color:var(--blue);cursor:pointer;font-size:12px;margin-left:10px;}
+  .prow .pops a:hover{text-decoration:underline;}
+  .prow.empty .pmain a{color:var(--blue);cursor:pointer;font-size:13px;}
+  .prow.empty .pmain a:hover{text-decoration:underline;}
+  .ptab-add{padding:8px 12px;border-top:1px solid var(--border-l);background:#fcfcfd;}
+  .ptab-add a{color:var(--blue);cursor:pointer;font-size:12px;}
+  .ptab-add a:hover{text-decoration:underline;}
+
+  /* ---------- 选择品牌弹窗 ---------- */
+  .bm-mask{position:fixed;inset:0;background:rgba(20,28,44,.42);display:none;align-items:center;justify-content:center;z-index:85;}
+  .bm-mask.open{display:flex;}
+  .bm-dialog{width:460px;max-width:92%;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 20px 50px rgba(24,37,64,.22);}
+  .bm-hd{height:48px;padding:0 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border-l);}
+  .bm-hd h3{margin:0;font-size:15px;font-weight:600;}
+  .bm-hd .bm-sub{font-size:12px;color:var(--text3);font-weight:400;margin-left:8px;}
+  .bm-x{width:26px;height:26px;border:0;background:transparent;font-size:18px;line-height:1;color:var(--text3);cursor:pointer;border-radius:4px;}
+  .bm-x:hover{background:#f4f5f7;color:var(--text);}
+  .bm-thead,.bm-row{display:grid;grid-template-columns:56px 1fr 92px;align-items:center;height:38px;padding:0 14px;column-gap:8px;}
+  .bm-thead{background:#f2f6fd;font-size:12px;color:var(--text2);border-bottom:1px solid var(--border);}
+  .bm-thead span:first-child,.bm-thead .num{text-align:center;}
+  .bm-scroll{max-height:312px;overflow:auto;}
+  .bm-row{border-bottom:1px solid #f2f4f7;font-size:13px;color:var(--text);cursor:pointer;}
+  .bm-row:hover{background:#f5f8ff;}
+  .bm-row.on{background:var(--blue-l);}
+  .bm-row input{margin:0;accent-color:var(--blue);cursor:pointer;justify-self:center;}
+  .bm-row .num{text-align:center;font-size:12px;color:var(--text3);}
+  .bm-ft{height:52px;padding:0 14px;display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--border-l);background:#fcfcfd;font-size:12px;color:var(--text3);}
+  .bm-acts{display:flex;gap:8px;}
+  .btn.sm{height:26px;padding:0 10px;font-size:12px;}
+  .tins{
+    height:26px;border:1px solid var(--border);border-radius:3px;background:#fff;
+    font-size:12px;color:var(--text);padding:0 2px;outline:none;
+  }
+  .tins:focus{border-color:var(--blue);}
+  .inp.err,.tinp.err{border-color:var(--red);box-shadow:0 0 0 2px rgba(245,108,108,.12);}
+
+  /* 品牌多选下拉 */
+  .bsel{position:relative;width:268px;}
+  .bsel-trigger{
+    height:32px;border:1px solid var(--border);border-radius:4px;
+    display:flex;align-items:center;justify-content:space-between;gap:8px;
+    padding:0 10px;background:#fff;cursor:pointer;
+    font-size:13px;color:var(--text4);
+  }
+  .bsel-trigger:hover{border-color:#c3cbd8;}
+  .bsel-trigger.has-val{color:var(--text);}
+  .bsel-trigger .bsel-ph{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .bsel-panel{
+    position:absolute;top:calc(100% + 4px);left:0;width:100%;
+    background:#fff;border:1px solid var(--border-l);border-radius:4px;
+    box-shadow:0 10px 28px rgba(24,37,64,.14);
+    display:none;z-index:40;overflow:hidden;
+  }
+  .bsel-panel.open{display:block;}
+  .bsel-list{max-height:238px;overflow:auto;padding:4px 0;}
+  .bsel-item{
+    display:flex;align-items:center;gap:8px;
+    height:32px;padding:0 12px;
+    font-size:13px;color:var(--text);cursor:pointer;
+  }
+  .bsel-item:hover{background:#f5f8ff;}
+  .bsel-item input{width:15px;height:15px;accent-color:var(--blue);cursor:pointer;}
+  .bsel-item.on{background:var(--blue-l);color:var(--blue);}
+  .bsel-ft{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:8px 12px;border-top:1px solid var(--border-l);
+    font-size:12px;color:var(--text3);background:#fcfcfd;
+  }
+  .bsel-ft a{color:var(--blue);cursor:pointer;}
+  .bsel-ft a:hover{text-decoration:underline;}
+
+  /* ============ 选择商品弹窗 ============ */
+  .pm-mask{
+    position:fixed;inset:0;background:rgba(20,28,44,.45);
+    display:none;align-items:center;justify-content:center;
+    z-index:60;
+  }
+  .pm-mask.open{display:flex;}
+  .pm-dialog{
+    width:min(1320px,96%);
+    background:#fff;border-radius:10px;overflow:hidden;
+    box-shadow:0 24px 64px rgba(24,37,64,.24);
+    max-height:96%;
+    display:flex;flex-direction:column;
+  }
+  .pm-hd{
+    height:52px;padding:0 20px;flex:none;
+    display:flex;align-items:center;justify-content:space-between;
+    border-bottom:1px solid var(--border-l);
+  }
+  .pm-hd h3{margin:0;font-size:16px;font-weight:600;}
+  .pm-hd .pm-sub{font-size:12px;color:var(--text3);margin-left:10px;font-weight:400;}
+  .pm-x{
+    width:28px;height:28px;border:0;background:transparent;
+    font-size:20px;line-height:1;color:var(--text3);cursor:pointer;border-radius:4px;
+  }
+  .pm-x:hover{background:#f4f5f7;color:var(--text);}
+  .pm-bd{padding:14px 20px 0;flex:none;}
+  .pm-transfer{display:flex;align-items:stretch;}
+  .pm-pane{
+    flex:1;min-width:0;display:flex;flex-direction:column;
+    border:1px solid var(--border-l);border-radius:6px;overflow:hidden;background:#fff;
+  }
+  .pm-pane-hd{
+    height:38px;padding:0 12px;flex:none;
+    display:flex;align-items:center;justify-content:space-between;
+    background:#f7f8fa;border-bottom:1px solid var(--border-l);
+    font-size:13px;font-weight:500;
+  }
+  .pm-pane-hd .pm-cnt{font-size:12px;color:var(--text3);font-weight:400;}
+  .pm-pane-hd .pm-cnt b{color:var(--blue);font-size:13px;}
+  .pm-filter{padding:11px 12px 10px;background:#fcfcfd;border-bottom:1px solid var(--border-l);flex:none;}
+  .pm-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 12px;}
+  .pm-f{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);min-width:0;}
+  .pm-f > span{white-space:nowrap;flex:none;width:48px;}
+  .pm-f input{
+    flex:1;min-width:0;height:28px;border:1px solid var(--border);border-radius:4px;
+    padding:0 8px;font-size:12px;outline:none;background:#fff;
+  }
+  .pm-f input::placeholder{color:var(--text4);}
+  .pm-f input:focus{border-color:var(--blue);box-shadow:0 0 0 2px rgba(22,119,255,.1);}
+  .pm-f select{
+    flex:1;min-width:0;height:28px;border:1px solid var(--border);border-radius:4px;
+    padding:0 4px 0 8px;font-size:12px;color:var(--text);outline:none;background:#fff;cursor:pointer;
+  }
+  .pm-f select:focus{border-color:var(--blue);box-shadow:0 0 0 2px rgba(22,119,255,.1);}
+  .pm-fa{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:8px;}
+  .pm-fa .pm-f{width:calc(50% - 6px);flex:none;}
+  .pm-fa-btns{display:flex;gap:8px;flex:none;}
+  .pmbtn{
+    height:28px;padding:0 13px;border:1px solid var(--border);border-radius:4px;
+    background:#fff;color:var(--text);font-size:12px;cursor:pointer;
+  }
+  .pmbtn:hover{border-color:var(--blue);color:var(--blue);}
+  .pmbtn.primary{background:var(--blue);border-color:var(--blue);color:#fff;}
+  .pmbtn.primary:hover{background:#0f62e0;border-color:#0f62e0;color:#fff;}
+  .pm-body{
+    height:352px;overflow-y:auto;overflow-x:hidden;
+    --cols:22px 62px 80px minmax(0,1fr) 92px 52px 46px 24px;
+    scrollbar-width:thin;
+  }
+  .pm-body::-webkit-scrollbar{width:6px;}
+  .pm-body::-webkit-scrollbar-thumb{background:#dfe3ea;border-radius:3px;}
+  .pm-thead{
+    display:grid;grid-template-columns:var(--cols);column-gap:6px;align-items:center;
+    height:32px;padding:0 8px;position:sticky;top:0;z-index:2;
+    background:#f9fafb;border-bottom:1px solid var(--border-l);
+    font-size:12px;color:var(--text3);
+  }
+  .pm-thead .num{text-align:right;}
+  .pm-thead .c{text-align:center;}
+  .pm-row{
+    display:grid;grid-template-columns:var(--cols);column-gap:6px;align-items:center;
+    height:40px;padding:0 8px;
+    border-bottom:1px solid #f2f4f7;
+    font-size:12px;color:var(--text2);cursor:pointer;
+  }
+  .pm-row:hover{background:#f5f8ff;}
+  .pm-row.on{background:var(--blue-l);}
+  .pm-row.off{opacity:.55;cursor:not-allowed;}
+  .pm-row.off:hover{background:transparent;}
+  .pm-row input[type=checkbox]{width:14px;height:14px;margin:0;accent-color:var(--blue);cursor:pointer;}
+  .pm-row .brand{display:block;margin-right:0;gap:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .pm-thead .brand{margin-right:0;gap:0;}
+  .pm-row .nm{font-size:13px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .pm-row .sku{color:var(--text3);}
+  .pm-row .spec{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .pm-row .price{text-align:right;color:var(--text);}
+  .pm-row .st{text-align:center;}
+  .pm-row .st.off{color:var(--red);}
+  .pm-rm,.pm-add{
+    width:20px;height:20px;border:0;background:transparent;color:var(--text3);
+    border-radius:3px;cursor:pointer;font-size:13px;line-height:1;
+    display:flex;align-items:center;justify-content:center;
+    opacity:.45;transition:.12s;justify-self:center;padding:0;
+  }
+  .pm-row:hover .pm-rm,.pm-row:hover .pm-add{opacity:1;}
+  .pm-rm:hover{background:#fef0f0;color:var(--red);}
+  .pm-add:hover{background:var(--blue-l);color:var(--blue);}
+  .pm-ft{
+    height:42px;padding:0 10px;flex:none;
+    display:flex;align-items:center;justify-content:space-between;
+    border-top:1px solid var(--border-l);background:#fcfcfd;
+    font-size:12px;color:var(--text3);
+  }
+  .pm-check{display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px;color:var(--text2);}
+  .pm-check input{width:14px;height:14px;accent-color:var(--blue);cursor:pointer;}
+  .pm-ops{
+    width:56px;flex:none;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;
+  }
+  .pm-op{
+    width:34px;height:34px;border:1px solid #d6e4ff;background:#eaf2ff;color:var(--blue);
+    border-radius:4px;cursor:pointer;font-size:15px;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .pm-op:hover:not(:disabled){background:#dceaff;}
+  .pm-op:disabled{background:#f5f7fa;border-color:var(--border);color:var(--text4);cursor:not-allowed;}
+  .pm-footer{
+    height:56px;padding:0 20px;margin-top:14px;flex:none;
+    display:flex;align-items:center;justify-content:space-between;
+    border-top:1px solid var(--border-l);background:#fcfcfd;
+  }
+  .pm-sum{font-size:13px;color:var(--text2);}
+  .pm-sum b{color:var(--blue);font-size:14px;font-weight:600;margin:0 2px;}
+  .pm-hint{font-size:12px;color:var(--text4);margin-left:8px;}
+  .pm-acts{display:flex;gap:10px;}
+  .pm-acts .pmbtn{height:32px;padding:0 18px;}
+  .pm-empty{
+    height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:6px;text-align:center;padding:20px;
+  }
+  .pm-empty .t{font-size:13px;color:var(--text2);}
+  .pm-empty .d{font-size:12px;color:var(--text4);line-height:18px;}
+  .pm-empty .pmbtn{margin-top:8px;height:26px;}
+
+  .toast{
+    position:fixed;top:22px;left:50%;
+    transform:translateX(-50%) translateY(-10px);
+    background:#333c4d;color:#fff;font-size:13px;
+    padding:9px 16px;border-radius:6px;
+    opacity:0;pointer-events:none;transition:.22s;z-index:99;
+    box-shadow:0 8px 24px rgba(24,37,64,.24);
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  .toast.err{background:#f56c6c;}
+
+  .sub-line{display:flex;align-items:center;gap:8px;margin-top:2px;}
+  .sub-line .t{color:var(--text2);}
+  .actions{display:flex;gap:12px;margin-top:26px;padding-left:104px;}
+  .actions .btn{min-width:76px;}
+</style>
+</head>
+<body>
+
+<!-- ================= 顶部栏 ================= -->
+<header class="topbar">
+  <div class="brand">
+    <span class="logo">
+      <svg width="27" height="27" viewBox="0 0 24 24" fill="none">
+        <path d="M9.2 17.6c-.9-.4-1.4-1.3-1.2-2.3.3-1.5 1.9-2.2 3.4-2.4 1.2-.2 2.1-.7 2.4-1.8" stroke="#fff" stroke-width="2.1" stroke-linecap="round"/>
+        <path d="M13.8 11.1c1.5-.1 2.4-1.1 2.4-2.3 0-1.3-1-2.2-2.3-2.2-1.2 0-2.1.7-2.4 1.7" stroke="#fff" stroke-width="2.1" stroke-linecap="round"/>
+        <circle cx="14.6" cy="8.5" r=".95" fill="#f7a900"/>
+        <path d="M16.9 8.7h1.9" stroke="#f7a900" stroke-width="1.8" stroke-linecap="round"/>
+      </svg>
+    </span>
+    <span class="name">大黄鹅</span>
+  </div>
+
+  <nav class="topnav">
+    <a href="#">售货机运营</a>
+    <a href="#">供应链中心</a>
+    <a href="#" class="on">营销中心</a>
+    <a href="#">服务商管理</a>
+  </nav>
+
+  <div class="topright">
+    <button class="ico-btn" title="扫码">
+      <svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3">
+        <path d="M2 5.5V3.2c0-.7.5-1.2 1.2-1.2H5.5M10.5 2h2.3c.7 0 1.2.5 1.2 1.2v2.3M14 10.5v2.3c0 .7-.5 1.2-1.2 1.2h-2.3M5.5 14H3.2c-.7 0-1.2-.5-1.2-1.2v-2.3" stroke-linecap="round"/>
+        <path d="M5 6h6M5 9h3" stroke-linecap="round"/>
+      </svg>
+    </button>
+    <button class="ico-btn" title="消息">
+      <svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3">
+        <path d="M14 9.2c0 1.5-1.2 2.7-2.7 2.7H6.2L3 14V4.2c0-1.5 1.2-2.7 2.7-2.7h5.6C12.8 1.5 14 2.7 14 4.2v5z" stroke-linejoin="round"/>
+      </svg>
+    </button>
+    <button class="ico-btn" title="通知">
+      <svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3">
+        <path d="M4 6.6a4 4 0 018 0v3.1l1 1.6H3l1-1.6V6.6z" stroke-linejoin="round"/>
+        <path d="M6.6 13.2a1.5 1.5 0 002.8 0" stroke-linecap="round"/>
+      </svg>
+    </button>
+    <div class="user">
+      <span class="avatar">王</span>
+      <span class="un">王泳瑜</span>
+      <span class="caret">
+        <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.3">
+          <path d="M2.5 4.5L6 8l3.5-3.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </span>
+    </div>
+  </div>
+</header>
+
+<div class="layout">
+  <!-- ================= 左侧菜单 ================= -->
+  <aside class="side">
+    <div class="nav-item">
+      <span class="nic">
+        <svg width="14" height="14" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.1">
+          <rect x="1.5" y="1.5" width="9" height="9" rx="1.5"/>
+          <path d="M1.5 4.5h9"/>
+        </svg>
+      </span>
+      <span>营销展位</span>
+      <span class="caret">
+        <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.2">
+          <path d="M2.5 7.5L6 4l3.5 3.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </span>
+    </div>
+    <div class="nav-sub">
+      <div class="nav-item">
+        <span class="nic">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.1">
+            <rect x="2" y="2" width="8" height="8" rx="1"/>
+          </svg>
+        </span>
+        <span>广告管理</span>
+      </div>
+    </div>
+
+    <div class="nav-item">
+      <span class="nic">
+        <svg width="14" height="14" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.1">
+          <rect x="1.5" y="2.5" width="9" height="7" rx="1.2"/>
+          <path d="M4 2.5V1.6M8 2.5V1.6"/>
+        </svg>
+      </span>
+      <span>优惠券</span>
+      <span class="caret">
+        <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.2">
+          <path d="M2.5 7.5L6 4l3.5 3.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </span>
+    </div>
+    <div class="nav-sub">
+      <div class="nav-item on"><span>优惠券管理</span></div>
+      <div class="nav-item"><span>发券审核</span></div>
+      <div class="nav-item"><span>领取记录</span></div>
+    </div>
+
+    <div class="nav-item">
+      <span class="nic">
+        <svg width="14" height="14" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.1">
+          <circle cx="6" cy="6" r="4.5"/>
+          <path d="M6 3.6v4.8M3.6 6h4.8"/>
+        </svg>
+      </span>
+      <span>金币管理</span>
+      <span class="caret">
+        <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.2">
+          <path d="M2.5 7.5L6 4l3.5 3.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </span>
+    </div>
+
+    <div class="nav-item">
+      <span class="nic">
+        <svg width="14" height="14" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.1">
+          <path d="M6 1.6l4.2 2.1v4.6L6 10.4 1.8 8.3V3.7L6 1.6z" stroke-linejoin="round"/>
+        </svg>
+      </span>
+      <span>供应链金币</span>
+      <span class="caret">
+        <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.2">
+          <path d="M2.5 7.5L6 4l3.5 3.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </span>
+    </div>
+    <div class="nav-sub">
+      <div class="nav-item"><span>返利规则</span></div>
+      <div class="nav-item"><span>金币发放</span></div>
+      <div class="nav-item"><span>发放审核</span></div>
+      <div class="nav-item"><span>金币记录</span></div>
+    </div>
+
+    <div class="nav-item">
+      <span class="nic">
+        <svg width="14" height="14" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.1">
+          <path d="M2 4.5h8M2 7.5h5" stroke-linecap="round"/>
+          <circle cx="9" cy="7.5" r="1.4"/>
+        </svg>
+      </span>
+      <span>品牌联名柜</span>
+      <span class="caret">
+        <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.2">
+          <path d="M2.5 7.5L6 4l3.5 3.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </span>
+    </div>
+  </aside>
+
+  <!-- ================= 主内容 ================= -->
+  <main class="main">
+    <div class="crumb">
+      <span class="lb">当前位置：</span>
+      <a href="#">优惠券</a><span>/</span>
+      <a href="#">优惠券管理</a><span>/</span>
+      <span class="cur">创建优惠券</span>
+    </div>
+
+    <!-- 基本信息 -->
+    <section class="sec">
+      <div class="sec-hd">基本信息</div>
+      <div class="form">
+
+        <div class="row">
+          <label class="lb req">优惠券名称:</label>
+          <div class="ctl">
+            <input class="inp w-name" placeholder="20字以内，商户可见" maxlength="20">
+            <span class="counter">0/20</span>
+          </div>
+        </div>
+
+        <div class="row">
+          <label class="lb">备注:</label>
+          <div class="ctl">
+            <input class="inp w-name" placeholder="20字以内，内部可见" maxlength="20">
+            <span class="counter">0/20</span>
+          </div>
+        </div>
+
+        <div class="row" style="margin-top:14px;">
+          <span class="lb req">发放主体:</span>
+          <div class="ctl">
+            <label class="radio"><input type="radio" name="issuer" checked><span class="txt">大黄鹅</span></label>
+            <label class="radio"><input type="radio" name="issuer"><span class="txt">乐科</span></label>
+          </div>
+        </div>
+
+        <div class="row">
+          <span class="lb req">领取方式:</span>
+          <div class="ctl">
+            <label class="radio"><input type="radio" name="takeway" checked><span class="txt">自主领取</span></label>
+            <label class="radio">
+              <input type="radio" name="takeway"><span class="txt">定向投放</span>
+              <span class="info-ic" title="定向投放说明">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.2">
+                  <circle cx="7" cy="7" r="5.6"/>
+                  <path d="M7 6.2v3.6" stroke-linecap="round"/>
+                  <circle cx="7" cy="4.4" r=".7" fill="currentColor" stroke="none"/>
+                </svg>
+              </span>
+            </label>
+          </div>
+        </div>
+
+        <div class="row">
+          <span class="lb req">领取时间:</span>
+          <div class="ctl">
+            <div class="date" data-date="startTime">
+              <span>开始时间</span>
+              <svg width="14" height="14" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.1">
+                <rect x="1.6" y="2.4" width="8.8" height="8" rx="1.2"/>
+                <path d="M1.6 5h8.8M4 1.6v1.6M8 1.6v1.6"/>
+              </svg>
+            </div>
+            <span class="tilde">-</span>
+            <div class="date" data-date="endTime">
+              <span>结束时间</span>
+              <svg width="14" height="14" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.1">
+                <rect x="1.6" y="2.4" width="8.8" height="8" rx="1.2"/>
+                <path d="M1.6 5h8.8M4 1.6v1.6M8 1.6v1.6"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <span class="lb req">领取限制:</span>
+          <div class="ctl">
+            <input class="inp w-flex" placeholder="每个商户领取张数限制，最大99张">
+          </div>
+        </div>
+
+        <div class="row">
+          <span class="lb req">优惠券总数:</span>
+          <div class="ctl">
+            <input class="inp w-num" placeholder="优惠券总数">
+          </div>
+        </div>
+
+        <div class="row">
+          <span class="lb">区域限制:</span>
+          <div class="ctl">
+            <div class="sel" style="width:248px;">
+              <span>请选择</span>
+              <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.3">
+                <path d="M2.5 4.5L6 8l3.5-3.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- 使用规则 -->
+    <section class="sec">
+      <div class="sec-hd">使用规则</div>
+      <div class="form">
+
+        <div class="row">
+          <span class="lb req">优惠类型:</span>
+          <div class="ctl">
+            <label class="radio"><input type="radio" name="ctype" value="voucher" checked><span class="txt">代金券</span></label>
+            <label class="radio"><input type="radio" name="ctype" value="discount"><span class="txt">折扣券</span></label>
+            <label class="radio"><input type="radio" name="ctype" value="box"><span class="txt">按箱优惠</span></label>
+          </div>
+        </div>
+
+        <!-- 代金券 / 折扣券：单组规则表 + 动态明细列 -->
+        <div id="blk-simple">
+          <div class="row" style="align-items:flex-start;">
+            <span class="lb req">使用规则:</span>
+            <div class="ctl" style="flex-direction:column;align-items:stretch;flex-wrap:nowrap;">
+              <div class="tier srule" id="sWrap">
+                <div class="tier-hd" id="sHead"></div>
+                <div class="tier-row" id="sRow">
+                  <div class="cell" id="cAmount">
+                    <input class="tinp" style="width:80px;" id="amountInp" placeholder="0.00"><span class="unit">元</span>
+                  </div>
+                  <div class="cell" id="cRate" style="display:none;">
+                    <input class="tinp" style="width:56px;" id="rateInp" placeholder="0"><span class="unit">%</span>
+                  </div>
+                  <div class="cell" id="cCap" style="display:none;">
+                    <input class="tinp" style="width:60px;" id="capInp" placeholder="不限"><span class="unit">元</span>
+                  </div>
+                  <div class="cell">
+                    <span class="unit">满</span>
+                    <input class="tinp" style="width:60px;" id="condInp" placeholder="0">
+                    <select class="tins" id="condSel" style="height:26px;font-size:12px;padding:0 2px;width:50px;">
+                      <option value="amount">元</option>
+                      <option value="qty">件</option>
+                    </select>
+                    <span class="unit">可用</span>
+                  </div>
+                  <div class="cell">
+                    <div class="lsel" id="simLim">
+                      <span class="lsel-t" id="simLimT">全部商品</span>
+                      <svg width="9" height="9" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 4.5L6 8l3.5-3.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </div>
+                  </div>
+                  <div class="cell dcell" id="cDetail" style="display:none;"></div>
+                </div>
+              </div>
+              <div class="cuttip" id="cutTip" style="display:none;"></div>
+              <div class="tier-tip" id="sTip"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 按箱优惠：阶梯表格 -->
+        <div id="blk-box" style="display:none;">
+          <div class="row" style="align-items:flex-start;">
+            <span class="lb req">阶梯规则:</span>
+            <div class="ctl" style="flex-direction:column;align-items:stretch;flex-wrap:nowrap;">
+              <div class="tier" id="rtWrap">
+                <div class="tier-hd" id="rtHead"></div>
+                <div id="rtBody"></div>
+              </div>
+              <div class="tier-tip" id="rtTip"></div>
+            </div>
+          </div>
+        </div>
+
+
+        <div class="row">
+          <span class="lb req">使用渠道:</span>
+          <div class="ctl">
+            <div class="sel disabled" style="width:124px;">
+              <span class="val">供应链采购</span>
+              <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.3">
+                <path d="M2.5 4.5L6 8l3.5-3.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <span class="lb">自营限制:</span>
+          <div class="ctl">
+            <label class="radio"><input type="radio" name="self" checked><span class="txt">不限</span></label>
+            <label class="radio"><input type="radio" name="self"><span class="txt">自营</span></label>
+            <label class="radio"><input type="radio" name="self"><span class="txt">非自营</span></label>
+          </div>
+        </div>
+
+        <div class="row" style="margin-top:12px;">
+          <span class="lb req">可用时间:</span>
+          <div class="ctl" style="align-items:flex-start;">
+            <div style="display:flex;align-items:center;gap:3px;flex-wrap:wrap;">
+              <label class="radio"><input type="radio" name="validtime" value="fix" checked><span class="txt">固定时间</span></label>
+              <label class="radio"><input type="radio" name="validtime" value="range"><span class="txt">固定日期</span></label>
+              <div class="sub-line" id="vtFix" style="margin-left:0;flex-basis:100%;margin-top:4px;padding-left:0;">
+                <span class="t">领取后</span>
+                <input class="inp w-sm" id="vtDays" placeholder="正数">
+                <span class="t">天内有效</span>
+              </div>
+              <div class="sub-line" id="vtRange" style="display:none;margin-left:0;flex-basis:100%;margin-top:4px;padding-left:0;">
+                <div class="date" data-date="vStart">
+                  <span>开始时间</span>
+                  <svg width="14" height="14" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.1">
+                    <rect x="1.6" y="2.4" width="8.8" height="8" rx="1.2"/>
+                    <path d="M1.6 5h8.8M4 1.6v1.6M8 1.6v1.6"/>
+                  </svg>
+                </div>
+                <span class="tilde">-</span>
+                <div class="date" data-date="vEnd">
+                  <span>结束时间</span>
+                  <svg width="14" height="14" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.1">
+                    <rect x="1.6" y="2.4" width="8.8" height="8" rx="1.2"/>
+                    <path d="M1.6 5h8.8M4 1.6v1.6M8 1.6v1.6"/>
+                  </svg>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button class="btn">取消</button>
+          <button class="btn primary" id="saveBtn">保存</button>
+        </div>
+
+      </div>
+    </section>
+  </main>
+</div>
+
+<script>
+(function(){
+  /* 大屏自适应：设计基准宽 1500，超出按比例放大（最大 1.4 倍） */
+  function fit(){
+    var w = document.documentElement.clientWidth;
+    var z = Math.min(1.4, Math.max(1, w / 1500));
+    document.documentElement.style.zoom = z.toFixed(3);
+  }
+  fit();
+  window.addEventListener('resize', fit);
+
+  /* 优惠类型切换 -> 由表格模块重绘 */
+  document.querySelectorAll('input[name=ctype]').forEach(function(r){
+    r.addEventListener('change', function(){
+      if(window.RT) window.RT.render();
+    });
+  });
+
+  /* 可用时间：固定时间 / 固定日期 切换 */
+  function vtSync(){
+    var el = document.querySelector('input[name=validtime]:checked');
+    var isFix = !el || el.value === 'fix';
+    var f = document.getElementById('vtFix'), r = document.getElementById('vtRange');
+    if (f) f.style.display = isFix ? '' : 'none';
+    if (r) r.style.display = isFix ? 'none' : '';
+  }
+  document.querySelectorAll('input[name=validtime]').forEach(function (r) {
+    r.addEventListener('change', vtSync);
+  });
+  vtSync();
+
+  /* ---------- 日期选择浮层（领取时间 / 可用时间共用） ---------- */
+  var dpEl = null, dpAnchor = null, dpY = 0, dpM = 0;
+  function dpFmt(y, m, d){ return y + '-' + String(m + 1).padStart(2, '0') + '-' + String(d).padStart(2, '0'); }
+  function dpBuild(){
+    var first = new Date(dpY, dpM, 1);
+    var startDow = (first.getDay() + 6) % 7;           /* 周一为首列 */
+    var days = new Date(dpY, dpM + 1, 0).getDate();
+    var prevDays = new Date(dpY, dpM, 0).getDate();
+    var html = '<div class="dp-hd">' +
+                 '<span class="dp-nav" data-mv="-1">‹</span>' +
+                 '<b>' + dpY + ' 年 ' + (dpM + 1) + ' 月</b>' +
+                 '<span class="dp-nav" data-mv="1">›</span>' +
+               '</div><div class="dp-w">' +
+                 ['一','二','三','四','五','六','日'].map(function (w) { return '<span>' + w + '</span>'; }).join('') +
+               '</div><div class="dp-g">';
+    for (var i = startDow - 1; i >= 0; i--) html += '<i class="other" data-d="' + (dpY + '-' + (dpM === 0 ? 12 : dpM) + '-' + (prevDays - i)) + '">' + (prevDays - i) + '</i>';
+    var today = new Date();
+    var cur = dpAnchor && dpAnchor.dataset.val ? dpAnchor.dataset.val : '';
+    for (var d = 1; d <= days; d++) {
+      var val = dpFmt(dpY, dpM, d);
+      var cls = '';
+      if (val === cur) cls = 'on';
+      else if (today.getFullYear() === dpY && today.getMonth() === dpM && today.getDate() === d) cls = 'today';
+      html += '<i class="' + cls + '" data-d="' + val + '">' + d + '</i>';
+    }
+    var tail = (7 - ((startDow + days) % 7)) % 7;
+    for (var t = 1; t <= tail; t++) html += '<i class="other" data-d="' + (dpY + '-' + (dpM === 11 ? 1 : dpM + 2) + '-' + t) + '">' + t + '</i>';
+    html += '</div><div class="dp-ft"><a data-today="1">今天</a><a data-clear="1">清空</a></div>';
+    dpEl.innerHTML = html;
+  }
+  function dpPlace(){
+    var z = parseFloat(document.documentElement.style.zoom) || 1;
+    var rect = dpAnchor.getBoundingClientRect();
+    var h = dpEl.offsetHeight || 300, w = dpEl.offsetWidth || 238;
+    var left = rect.left;
+    if (left + w * z > window.innerWidth - 8) left = Math.max(8, window.innerWidth - w * z - 8);
+    var top = rect.bottom + 4;
+    if ((top + h) * z > window.innerHeight - 8) top = Math.max(8, rect.top - h * z - 4);
+    dpEl.style.left = (left / z) + 'px';
+    dpEl.style.top = (top / z) + 'px';
+  }
+  function dpOpen(anchor){
+    if (!dpEl) {
+      dpEl = document.createElement('div');
+      dpEl.className = 'dp';
+      document.body.appendChild(dpEl);
+      dpEl.addEventListener('click', function (e) {
+        var mv = e.target.closest('[data-mv]');
+        if (mv) { dpM += +mv.dataset.mv; if (dpM < 0) { dpM = 11; dpY--; } if (dpM > 11) { dpM = 0; dpY++; } dpBuild(); return; }
+        if (e.target.closest('[data-today]')) {
+          var n = new Date();
+          dpY = n.getFullYear(); dpM = n.getMonth();
+          dpFill(dpFmt(n.getFullYear(), n.getMonth(), n.getDate()));
+          return;
+        }
+        if (e.target.closest('[data-clear]')) { dpFill(''); return; }
+        var day = e.target.closest('i[data-d]');
+        if (day) {
+          var p = day.dataset.d.split('-');
+          dpY = +p[0]; dpM = +p[1] - 1;
+          dpFill(day.dataset.d);
+        }
+      });
+      document.addEventListener('click', function (e) {
+        if (!dpEl.classList.contains('open')) return;
+        if (e.target.closest('.dp') || e.target.closest('.date')) return;
+        dpEl.classList.remove('open');
+      });
+    }
+    dpAnchor = anchor;
+    var v = anchor.dataset.val || '';
+    var base = v ? new Date(v) : new Date();
+    dpY = base.getFullYear(); dpM = base.getMonth();
+    dpBuild();
+    dpEl.classList.add('open');
+    dpPlace();
+  }
+  function dpFill(val){
+    if (!dpAnchor) return;
+    dpAnchor.dataset.val = val;
+    dpAnchor.classList.toggle('on', !!val);
+    var sp = dpAnchor.querySelector('span');
+    if (sp) sp.textContent = val || dpAnchor.dataset.ph;
+    if (dpEl) dpEl.classList.remove('open');
+    dpAnchor = null;
+  }
+  document.querySelectorAll('.date').forEach(function (el) {
+    el.dataset.ph = el.querySelector('span') ? el.querySelector('span').textContent : '请选择';
+    el.addEventListener('click', function (e) { e.stopPropagation(); dpOpen(el); });
+  });
+
+  /* 通用提示 */
+  var toastTimer = null;
+  window.__toast = function(msg){
+    var t = document.getElementById('toast');
+    if(!t) return;
+    t.textContent = msg;
+    t.className = 'toast show' + (/请|不能|需/.test(msg) ? ' err' : '');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ t.className = 'toast'; }, 2000);
+  };
+  window.__mark = function(el){
+    if(!el) return;
+    el.classList.add('err');
+    if(el.focus) el.focus();
+    setTimeout(function(){ el.classList.remove('err'); }, 1800);
+  };
+})();
+</script>
+<div class="toast" id="toast"></div>
+
+<!-- ================= 选择商品弹窗 ================= -->
+<div class="pm-mask" id="pmMask">
+  <div class="pm-dialog">
+    <div class="pm-hd">
+      <h3>选择商品<span class="pm-sub" id="pmSub">未选与已选各自独立筛选</span></h3>
+      <button class="pm-x" id="pmClose" title="关闭">&times;</button>
+    </div>
+    <div class="pm-bd">
+      <div class="pm-transfer">
+        <section class="pm-pane">
+          <header class="pm-pane-hd">
+            <span>未选商品</span>
+            <span class="pm-cnt">可选 <b id="pmLeftTotal">0</b> 个</span>
+          </header>
+          <div class="pm-filter">
+            <div class="pm-grid">
+              <label class="pm-f"><span>供应商</span><select id="pmLSup"></select></label>
+              <label class="pm-f"><span>品牌</span><input id="pmLBrand" placeholder="请输入品牌"></label>
+              <label class="pm-f"><span>商品名称</span><input id="pmLName" placeholder="名称 / SKU"></label>
+              <label class="pm-f"><span>商品规格</span><input id="pmLSpec" placeholder="请输入规格"></label>
+            </div>
+            <div class="pm-fa">
+              <label class="pm-f"><span>售价</span><input id="pmLPrice" placeholder="请输入售价"></label>
+              <div class="pm-fa-btns">
+                <button class="pmbtn primary" id="pmLQuery">查询</button>
+                <button class="pmbtn" id="pmLReset">重置</button>
+              </div>
+            </div>
+          </div>
+          <div class="pm-body" id="pmLeft"></div>
+          <footer class="pm-ft">
+            <label class="pm-check"><input type="checkbox" id="pmLeftAll"><span>全选</span></label>
+            <span id="pmLeftHit">共 0 条</span>
+          </footer>
+        </section>
+
+        <div class="pm-ops">
+          <button class="pm-op" id="pmAdd" title="加入已选" disabled>&rarr;</button>
+          <button class="pm-op" id="pmRemove" title="移出已选" disabled>&larr;</button>
+        </div>
+
+        <section class="pm-pane">
+          <header class="pm-pane-hd">
+            <span>已选商品</span>
+            <span class="pm-cnt"><b id="pmRightTotal">0</b> / <span id="pmAllTotal">0</span></span>
+          </header>
+          <div class="pm-filter">
+            <div class="pm-grid">
+              <label class="pm-f"><span>供应商</span><select id="pmRSup"></select></label>
+              <label class="pm-f"><span>品牌</span><input id="pmRBrand" placeholder="请输入品牌"></label>
+              <label class="pm-f"><span>商品名称</span><input id="pmRName" placeholder="名称 / SKU"></label>
+              <label class="pm-f"><span>商品规格</span><input id="pmRSpec" placeholder="请输入规格"></label>
+            </div>
+            <div class="pm-fa">
+              <label class="pm-f"><span>售价</span><input id="pmRPrice" placeholder="请输入售价"></label>
+              <div class="pm-fa-btns">
+                <button class="pmbtn primary" id="pmRQuery">查询</button>
+                <button class="pmbtn" id="pmRReset">重置</button>
+              </div>
+            </div>
+          </div>
+          <div class="pm-body" id="pmRight"></div>
+          <footer class="pm-ft">
+            <label class="pm-check"><input type="checkbox" id="pmRightAll"><span>全选</span></label>
+            <span id="pmRightHit">共 0 条</span>
+          </footer>
+        </section>
+      </div>
+    </div>
+    <div class="pm-footer">
+      <div class="pm-sum">已选 <b id="pmSel">0</b> / <span id="pmAll">0</span> 个商品<span class="pm-hint">上限 1000 个</span></div>
+      <div class="pm-acts">
+        <button class="pmbtn" id="pmCancel">取消</button>
+        <button class="pmbtn primary" id="pmOk">确定</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ================= 商品限制下拉菜单 ================= -->
+<div class="lmenu" id="lmenu"></div>
+<div class="bmpop" id="bmpop"></div>
+
+<!-- ================= 选择品牌弹窗 ================= -->
+<div class="bm-mask" id="bmMask">
+  <div class="bm-dialog">
+    <div class="bm-hd">
+      <h3>选择品牌<span class="bm-sub">可多选，仅对当前行生效</span></h3>
+      <button class="bm-x" id="bmClose" title="关闭">&times;</button>
+    </div>
+    <div class="bm-thead"><span>选择</span><span>品牌</span><span class="num">在售商品</span></div>
+    <div class="bm-scroll" id="bmBody"></div>
+    <div class="bm-ft">
+      <span id="bmCnt">已选 0 个品牌</span>
+      <div class="bm-acts">
+        <button class="btn" id="bmCancel">取消</button>
+        <button class="btn primary" id="bmOk">确定</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script>
+(function(){
+  'use strict';
+
+  /* ---------------- 商品数据 ---------------- */
+  var BRANDS = ['达利园','百事','三得利','维他','怡宝','伊利','喜之郎','茅台'];
+  var NAMES = {
+    '达利园': ['豆本豆原味豆奶','法式小面包','可比克薯片','蛋黄派','和其正凉茶','瑞士卷','软面包'],
+    '百事':   ['百事可乐','美年达橙味汽水','七喜','百事轻怡','佳得乐运动饮料','纯水乐','果缤纷'],
+    '三得利': ['乌龙茶','沁柠水','维体','利趣拿铁','沁桃水','无糖乌龙茶','啤酒'],
+    '维他':   ['柠檬茶','菊花茶','原味豆奶','巧克力奶','乌龙茶','芒果汁','蒸馏水'],
+    '怡宝':   ['纯净水','魔力饮料','假日系列','矿泉水','蜜水柠檬','气泡水','纯净水1.5L'],
+    '伊利':   ['纯牛奶','安慕希酸奶','优酸乳','金典有机奶','舒化奶','谷粒多','味可滋'],
+    '喜之郎': ['果冻','CiCi果冻爽','海苔','果肉果冻','吸吸果冻','布丁','果冻条'],
+    '茅台':   ['迎宾酒','王子酒','1935','汉酱','仁酒','迎宾酒小瓶','飞天小酒']
+  };
+  var SPECS = ['PET500ml*15','PET250ml*24','CAN330ml*24','盒装200g*12','袋装160g*16','箱装1.2kg*6','袋装80g*20'];
+  /* 供应商：同一品牌的商品可能来自不同供应商，故按「品牌序号 + 商品序号奇偶」分配两位供应商 */
+  var SUPS = ['深圳乐科供应链','广州百汇商贸','上海鼎丰食品','东莞新和仓储','杭州天成贸易'];
+
+  var DATA = [];
+  var seed = 21495001;
+  BRANDS.forEach(function (b, bi) {
+    NAMES[b].forEach(function (n, i) {
+      DATA.push({
+        sku: String(seed + bi * 1371 + i * 37),
+        brand: b,
+        sup: SUPS[(bi + (i % 2)) % SUPS.length],
+        name: b + n,
+        spec: SPECS[(bi + i) % SPECS.length],
+        price: 1 + ((bi * 5 + i * 3) % 19) * 0.45,
+        onSale: !(bi === 5 && i === 6) && !(bi === 7 && i === 2)
+      });
+    });
+  });
+  var TOTAL = DATA.length;
+
+  var S = {
+    sel: [],
+    lc: {},
+    rc: {},
+    fL: { sup:'', brand:'', name:'', spec:'', price:'' },
+    fR: { sup:'', brand:'', name:'', spec:'', price:'' }
+  };
+
+  function $(id){ return document.getElementById(id); }
+  function money(v){ return '¥' + Number(v).toFixed(2); }
+  function bySku(sku){ for (var i=0;i<DATA.length;i++) if (DATA[i].sku === sku) return DATA[i]; return null; }
+  function isSel(sku){ return S.sel.indexOf(sku) > -1; }
+  function match(p, f){
+    if (f.sup && p.sup !== f.sup) return false;
+    if (f.brand && p.brand.indexOf(f.brand.trim()) < 0) return false;
+    if (f.name && (p.name + ' ' + p.sku).toLowerCase().indexOf(f.name.trim().toLowerCase()) < 0) return false;
+    if (f.spec && p.spec.toLowerCase().indexOf(f.spec.trim().toLowerCase()) < 0) return false;
+    if (f.price && String(p.price).indexOf(f.price.trim()) < 0) return false;
+    return true;
+  }
+  function hasFilter(f){ return !!(f.sup || f.brand || f.name || f.spec || f.price); }
+
+  var HEAD = '<div class="pm-thead">' +
+    '<span></span><span>品牌</span><span>SkuId</span><span>商品名称</span>' +
+    '<span>规格</span><span class="num">售价</span><span class="c">状态</span><span></span></div>';
+
+  function leftSrc(){
+    var ex = S.exclude || [];
+    return DATA.filter(function (p) { return !isSel(p.sku) && ex.indexOf(p.sku) < 0 && match(p, S.fL); });
+  }
+  function rightSrc(){
+    return S.sel.map(bySku).filter(function (p) { return p && match(p, S.fR); });
+  }
+
+  function emptyBox(t, d, btnId, btnTxt){
+    return '<div class="pm-empty"><div class="t">' + t + '</div><div class="d">' + d + '</div>' +
+      (btnId ? '<button class="pmbtn" id="' + btnId + '">' + btnTxt + '</button>' : '') + '</div>';
+  }
+
+  function renderLeft(){
+    var list = leftSrc();
+    if (!list.length) {
+      if (TOTAL === S.sel.length) {
+        $('pmLeft').innerHTML = emptyBox('全部商品都已选择', '如需调整，请从右侧移出');
+      } else if (hasFilter(S.fL)) {
+        $('pmLeft').innerHTML = emptyBox('没有符合条件的商品', '试试调整本栏的搜索条件', 'pmEmptyL', '重置本栏筛选');
+        $('pmEmptyL').onclick = resetL;
+      } else {
+        $('pmLeft').innerHTML = emptyBox('暂无可选商品', '请先确认商品库是否已上架商品');
+      }
+    } else {
+      var buf = [HEAD];
+      for (var i = 0; i < list.length; i++) {
+        var p = list[i], ck = !!S.lc[p.sku];
+        buf.push(
+          '<div class="pm-row' + (ck ? ' on' : '') + (p.onSale ? '' : ' off') + '" data-sku="' + p.sku + '" title="供应商：' + p.sup + '">' +
+            '<input type="checkbox" ' + (ck ? 'checked' : '') + (p.onSale ? '' : ' disabled') + '>' +
+            '<span class="brand">' + p.brand + '</span>' +
+            '<span class="sku">' + p.sku + '</span>' +
+            '<span class="nm" title="' + p.name + '">' + p.name + '</span>' +
+            '<span class="spec" title="' + p.spec + '">' + p.spec + '</span>' +
+            '<span class="price">' + money(p.price) + '</span>' +
+            '<span class="st' + (p.onSale ? '' : ' off') + '">' + (p.onSale ? '上架' : '已下架') + '</span>' +
+            (p.onSale ? '<button class="pm-add" data-add="' + p.sku + '" title="加入已选">&rarr;</button>' : '<span></span>') +
+          '</div>'
+        );
+      }
+      $('pmLeft').innerHTML = buf.join('');
+    }
+    $('pmLeftTotal').textContent = TOTAL - S.sel.length;
+    $('pmLeftHit').textContent = hasFilter(S.fL) ? ('命中 ' + list.length + ' 条') : ('共 ' + list.length + ' 条');
+    syncLeftAll(list);
+  }
+
+  function syncLeftAll(list){
+    var all = $('pmLeftAll');
+    var usable = list.filter(function (r) { return r.onSale; });
+    var hit = usable.filter(function (r) { return S.lc[r.sku]; }).length;
+    all.checked = usable.length > 0 && hit === usable.length;
+    all.indeterminate = hit > 0 && hit < usable.length;
+    all.disabled = usable.length === 0;
+  }
+
+  function renderRight(){
+    var list = rightSrc();
+    var all = S.sel.length;
+    if (!all) {
+      $('pmRight').innerHTML = emptyBox('还没有选择商品', '在左侧勾选后点「→」加入<br>也可双击商品行快速加入');
+    } else if (!list.length) {
+      $('pmRight').innerHTML = emptyBox('已选 ' + all + ' 个商品，无匹配项', '本栏筛选只影响展示，不会清空已选内容', 'pmEmptyR', '重置本栏筛选');
+      $('pmEmptyR').onclick = resetR;
+    } else {
+      var html = HEAD;
+      for (var i = 0; i < list.length; i++) {
+        var p = list[i], ck = !!S.rc[p.sku];
+        html +=
+          '<div class="pm-row' + (ck ? ' on' : '') + '" data-sku="' + p.sku + '" title="供应商：' + p.sup + '">' +
+            '<input type="checkbox" ' + (ck ? 'checked' : '') + '>' +
+            '<span class="brand">' + p.brand + '</span>' +
+            '<span class="sku">' + p.sku + '</span>' +
+            '<span class="nm" title="' + p.name + '">' + p.name + '</span>' +
+            '<span class="spec" title="' + p.spec + '">' + p.spec + '</span>' +
+            '<span class="price">' + money(p.price) + '</span>' +
+            '<span class="st">上架</span>' +
+            '<button class="pm-rm" data-rm="' + p.sku + '" title="移除">&times;</button>' +
+          '</div>';
+      }
+      $('pmRight').innerHTML = html;
+    }
+    $('pmRightTotal').textContent = all;
+    $('pmAllTotal').textContent = TOTAL;
+    $('pmSel').textContent = all;
+    $('pmAll').textContent = TOTAL;
+    $('pmRightHit').textContent = hasFilter(S.fR) ? ('命中 ' + list.length + ' 条') : ('共 ' + all + ' 条');
+    var rAll = $('pmRightAll');
+    var n = Object.keys(S.rc).length;
+    rAll.checked = list.length > 0 && n === list.length;
+    rAll.indeterminate = n > 0 && n < list.length;
+    rAll.disabled = list.length === 0;
+    updateOps();
+  }
+
+  function updateOps(){
+    $('pmAdd').disabled = Object.keys(S.lc).length === 0;
+    $('pmRemove').disabled = Object.keys(S.rc).length === 0;
+  }
+  function render(){ renderLeft(); renderRight(); }
+
+  /* ---------- 行交互 ---------- */
+  $('pmLeft').addEventListener('click', function (e) {
+    var add = e.target.closest('.pm-add');
+    if (add) { addOne(add.dataset.add); return; }
+    var row = e.target.closest('.pm-row');
+    if (!row || row.classList.contains('off')) return;
+    if (S.single) { S.sel = [row.dataset.sku]; render(); return; }
+    var cb = row.querySelector('input');
+    if (e.target !== cb) cb.checked = !cb.checked;
+    if (cb.checked) S.lc[row.dataset.sku] = true; else delete S.lc[row.dataset.sku];
+    row.classList.toggle('on', cb.checked);
+    syncLeftAll(leftSrc());
+    updateOps();
+  });
+  $('pmLeft').addEventListener('dblclick', function (e) {
+    var row = e.target.closest('.pm-row');
+    if (!row || row.classList.contains('off')) return;
+    addOne(row.dataset.sku);
+  });
+  function addOneSingle(sku){ S.sel = [sku]; render(); }
+  $('pmRight').addEventListener('click', function (e) {
+    var rm = e.target.closest('.pm-rm');
+    if (rm) { removeOne(rm.dataset.rm); return; }
+    var row = e.target.closest('.pm-row');
+    if (!row) return;
+    var cb = row.querySelector('input');
+    if (e.target !== cb) cb.checked = !cb.checked;
+    if (cb.checked) S.rc[row.dataset.sku] = true; else delete S.rc[row.dataset.sku];
+    row.classList.toggle('on', cb.checked);
+    var list = rightSrc(), n = Object.keys(S.rc).length;
+    $('pmRightAll').checked = n === list.length && list.length > 0;
+    $('pmRightAll').indeterminate = n > 0 && n < list.length;
+    updateOps();
+  });
+
+  $('pmLeftAll').addEventListener('change', function () {
+    var on = this.checked;
+    leftSrc().forEach(function (p) {
+      if (!p.onSale) return;
+      if (on) S.lc[p.sku] = true; else delete S.lc[p.sku];
+    });
+    renderLeft();
+  });
+  $('pmRightAll').addEventListener('change', function () {
+    var on = this.checked;
+    S.rc = {};
+    if (on) rightSrc().forEach(function (p) { S.rc[p.sku] = true; });
+    renderRight();
+  });
+
+  function addOne(sku){
+    var p = bySku(sku);
+    if (!p || !p.onSale) return;
+    if (S.single) { S.sel = [sku]; render(); return; }
+    if (isSel(sku)) return;
+    S.sel.push(sku);
+    delete S.lc[sku];
+    render();
+  }
+  function removeOne(sku){
+    var i = S.sel.indexOf(sku);
+    if (i < 0) return;
+    S.sel.splice(i, 1);
+    delete S.rc[sku];
+    render();
+  }
+
+  $('pmAdd').addEventListener('click', function () {
+    var keys = Object.keys(S.lc);
+    if (S.single) { if (keys.length) S.sel = [keys[0]]; S.lc = {}; render(); return; }
+    keys.forEach(function (sku) {
+      if (!isSel(sku)) { var p = bySku(sku); if (p && p.onSale) S.sel.push(sku); }
+    });
+    S.lc = {};
+    render();
+  });
+  $('pmRemove').addEventListener('click', function () {
+    var keys = Object.keys(S.rc);
+    S.sel = S.sel.filter(function (sku) { return keys.indexOf(sku) < 0; });
+    S.rc = {};
+    render();
+  });
+
+  /* ---------- 两套筛选 ---------- */
+  function emptyF(){ return { sup:'', brand:'', name:'', spec:'', price:'' }; }
+  function readF(pre){
+    return {
+      sup: $(pre + 'Sup').value,
+      brand: $(pre + 'Brand').value,
+      name: $(pre + 'Name').value,
+      spec: $(pre + 'Spec').value,
+      price: $(pre + 'Price').value
+    };
+  }
+  function clearF(pre){
+    ['Sup','Brand','Name','Spec','Price'].forEach(function (k) { $(pre + k).value = ''; });
+  }
+  function queryL(){ S.fL = readF('pmL'); S.lc = {}; renderLeft(); }
+  function resetL(){ clearF('pmL'); S.fL = emptyF(); S.lc = {}; renderLeft(); }
+  function queryR(){ S.fR = readF('pmR'); S.rc = {}; renderRight(); }
+  function resetR(){ clearF('pmR'); S.fR = emptyF(); S.rc = {}; renderRight(); }
+  $('pmLQuery').onclick = queryL;
+  $('pmLReset').onclick = resetL;
+  $('pmRQuery').onclick = queryR;
+  $('pmRReset').onclick = resetR;
+  /* 供应商是固定下拉，选中即生效（无需再点「查询」） */
+  $('pmLSup').onchange = queryL;
+  $('pmRSup').onchange = queryR;
+  (function initSup(){
+    var h = '<option value="">全部供应商</option>';
+    SUPS.forEach(function (s) { h += '<option value="' + s + '">' + s + '</option>'; });
+    $('pmLSup').innerHTML = h;
+    $('pmRSup').innerHTML = h;
+  })();
+  ['pmLBrand','pmLName','pmLSpec','pmLPrice'].forEach(function (id) {
+    $(id).addEventListener('keydown', function (e) { if (e.key === 'Enter') queryL(); });
+  });
+  ['pmRBrand','pmRName','pmRSpec','pmRPrice'].forEach(function (id) {
+    $(id).addEventListener('keydown', function (e) { if (e.key === 'Enter') queryR(); });
+  });
+
+  /* =======================================================
+     优惠规则
+     · 代金券/折扣券：字段式（商品限制字段 + 单值金额/条件 +
+       商品多行小表格，每行一个商品，「新增」只加商品行）
+     · 按箱优惠：阶梯表格（行内含商品限制，按商品分组校验区间）
+     ======================================================= */
+  var state = { box: [] };                        // 按箱阶梯行
+  /* 代金券 / 折扣券：单组配置 */
+  var sim = { limit:'all', brands:[], groups:[] };  // groups: [{items:[商品], cut:''}] 一次多选=一组，组内共用优惠金额
+
+  function ctype(){
+    var el = document.querySelector('input[name=ctype]:checked');
+    return el ? el.value : 'voucher';
+  }
+  function esc(v){ return String(v == null ? '' : v).replace(/"/g, '&quot;'); }
+
+  /* ---------- 按箱阶梯表格 ---------- */
+  var BOX_COLS_ALL = [170, 170, 110, 250, 96];
+  var BOX_COLS_DET = [158, 144, 92, 140, 0, 96];
+
+  function newRow(inherit){
+    var r = { limit:'all', brands:[], products:[], from:'', to:'', cut:'0', max:'0' };
+    if (inherit) { r.limit = inherit.limit; r.brands = inherit.brands.slice(); r.products = inherit.products.slice(); }
+    return r;
+  }
+  function limLabel(r){
+    if (r.limit === 'brand') {
+      if (!r.brands.length) return '选择品牌';
+      return r.brands.length <= 2 ? r.brands.join('、')
+        : (r.brands.slice(0, 2).join('、') + ' 等 ' + r.brands.length + ' 个');
+    }
+    if (r.limit === 'product') return r.products.length ? ('已选 ' + r.products.length + ' 个商品') : '选择商品';
+    return '全部商品';
+  }
+  function limCell(r, i){
+    var cls = 'lsel' + (r.limit === 'all' ? '' : ' on');
+    return '<div class="' + cls + '" data-lim="' + i + '">' +
+             '<span class="lsel-t">' + limLabel(r) + '</span>' +
+             '<svg width="9" height="9" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4">' +
+               '<path d="M2.5 4.5L6 8l3.5-3.5" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
+           '</div>';
+  }
+  /* 明细独立列：品牌 chips / 商品行（与代金券同款交互，操作统一放操作列） */
+  function boxDetail(r, i){
+    if (r.limit === 'brand') {
+      var inner = r.brands.length
+        ? r.brands.map(function (b, k) {
+            return '<span class="chip">' + b + '<i data-brm="' + k + '" data-bi="' + i + '">&times;</i></span>';
+          }).join('')
+        : '<span class="ph">请选择品牌</span>';
+      return '<div class="msel mini' + (r.brands.length ? ' on' : '') + '" data-bfield="' + i + '">' + inner +
+               '<svg class="caret" width="9" height="9" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4">' +
+                 '<path d="M2.5 4.5L6 8l3.5-3.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>';
+    }
+    if (r.limit === 'product') {
+      if (!r.products.length) {
+        return '<span class="pchip empty" data-bpick="0" data-bi="' + i + '">+ 选择商品</span>';
+      }
+      return '<div class="pchips sm">' + r.products.filter(Boolean).map(function (p, k) {
+        return '<span class="pchip" data-bpick="' + k + '" data-bi="' + i + '" title="' + esc(p.name + '（' + p.spec + '）') + '">' +
+                 '<span class="pc-t">' + p.name + '</span>' +
+                 '<i data-bdelc="' + k + '" data-bi="' + i + '">&times;</i></span>';
+      }).join('') + '</div>';
+    }
+    return '';
+  }
+  function boxCfg(){
+    var kinds = {};
+    state.box.forEach(function (r) { if (r.limit !== 'all') kinds[r.limit] = 1; });
+    var has = Object.keys(kinds).length > 0;
+    if (!has) return { cols: BOX_COLS_ALL, head: ['下单数', '优惠规则', '最高封顶', '商品限制', '操作'], detail: false };
+    var name = (kinds.brand && kinds.product) ? '指定品牌 / 商品' : (kinds.brand ? '指定品牌' : '指定商品');
+    return { cols: BOX_COLS_DET, head: ['下单数', '优惠规则', '最高封顶', '商品限制', name, '操作'], detail: true };
+  }
+  function rowHtml(i){
+    var r = state.box[i], c = '', cfg = boxCfg();
+    c += '<div class="cell range">' +
+           '<input class="tinp" style="width:56px;" data-f="from" value="' + esc(r.from) + '" placeholder="请输入">' +
+           '<span class="to">到</span>' +
+           '<input class="tinp" style="width:56px;" data-f="to" value="' + esc(r.to) + '" placeholder="请输入">' +
+         '</div>';
+    c += '<div class="cell"><span class="pre">每档优惠</span><input class="tinp" style="width:50px;" data-f="cut" value="' + esc(r.cut) + '"><span class="unit">元</span></div>';
+    c += '<div class="cell"><input class="tinp" style="width:60px;" data-f="max" value="' + esc(r.max) + '"><span class="unit">元</span></div>';
+    c += '<div class="cell">' + limCell(r, i) + '</div>';
+    if (cfg.detail) c += '<div class="cell boxdetail">' + boxDetail(r, i) + '</div>';
+    c += '<div class="cell ops"><a data-act="add">新增</a><a data-act="del">删除</a></div>';
+    return '<div class="tier-row" data-i="' + i + '">' + c + '</div>';
+  }
+  function renderTable(){
+    if (!state.box.length) state.box.push(newRow());
+    var cfg = boxCfg();
+    var flexCol = cfg.cols.indexOf(0) > -1;
+    $('rtWrap').style.setProperty('--rcols', cfg.cols.map(function (n) { return n ? n + 'px' : '1fr'; }).join(' '));
+    $('rtWrap').style.width = flexCol ? '100%' : cfg.cols.reduce(function (a, b) { return a + b; }, 0) + 'px';
+    $('rtHead').innerHTML = cfg.head.map(function (h) { return '<span>' + h + '</span>'; }).join('');
+    $('rtBody').innerHTML = state.box.map(function (_, i) { return rowHtml(i); }).join('');
+    closeMenu();
+  }
+
+  $('rtBody').addEventListener('input', function (e) {
+    var f = e.target.dataset ? e.target.dataset.f : null;
+    if (!f) return;
+    var row = e.target.closest('.tier-row');
+    if (!row) return;
+    state.box[+row.dataset.i][f] = e.target.value;
+  });
+  $('rtBody').addEventListener('click', function (e) {
+    var a = e.target.closest('a[data-act]');
+    if (a) {
+      var i = +a.closest('.tier-row').dataset.i;
+      if (a.dataset.act === 'add') state.box.splice(i + 1, 0, newRow(state.box[i]));
+      else { if (state.box.length > 1) state.box.splice(i, 1); else state.box[i] = newRow(); }
+      renderTable();
+      return;
+    }
+    var lim = e.target.closest('.lsel');
+    if (lim) { e.stopPropagation(); openMenuFor({ kind:'row', t:'box', i:+lim.dataset.lim }, state.box[+lim.dataset.lim].limit, lim); return; }
+
+    /* 品牌 chips 移除 */
+    var brm = e.target.closest('[data-brm]');
+    if (brm) {
+      e.stopPropagation();
+      var bi = +brm.dataset.bi;
+      state.box[bi].brands.splice(+brm.dataset.brm, 1);
+      if (!state.box[bi].brands.length) state.box[bi].limit = 'all';
+      renderTable();
+      closeBrandPop();
+      return;
+    }
+    /* 点品牌字段 -> 浮层 */
+    var bf = e.target.closest('[data-bfield]');
+    if (bf) { e.stopPropagation(); openBrandPop({ kind:'boxRow', i:+bf.dataset.bfield }); return; }
+    /* 商品标签：点开多选弹窗 / × 移除单个 */
+    var bdelc = e.target.closest('[data-bdelc]');
+    if (bdelc) {
+      e.stopPropagation();
+      var ci = +bdelc.dataset.bi;
+      state.box[ci].products.splice(+bdelc.dataset.bdelc, 1);
+      if (!state.box[ci].products.length) state.box[ci].limit = 'all';
+      renderTable();
+      return;
+    }
+    var bpick = e.target.closest('[data-bpick]');
+    if (bpick) {
+      pickTarget = { kind:'boxRowProd', i:+bpick.dataset.bi };
+      openModal(false);
+      return;
+    }
+  });
+
+  /* ---------- 代金券 / 折扣券：单组规则 + 动态明细列 ---------- */
+  function simGroups(){
+    if (!sim.groups.length) sim.groups.push({ items: [], cut: '' });
+    return sim.groups;
+  }
+  function simFlat(){
+    var a = [];
+    sim.groups.forEach(function (g) { g.items.forEach(function (p) { if (p) a.push(p); }); });
+    return a;
+  }
+  function simLimText(){
+    if (sim.limit === 'brand') return sim.brands.length ? ('指定品牌 · ' + sim.brands.length) : '指定品牌';
+    if (sim.limit === 'product') {
+      var np = simFlat().length;
+      return np ? ('指定商品 · ' + np) : '指定商品';
+    }
+    return '全部商品';
+  }
+  function detailHtml(){
+    if (sim.limit === 'brand') {
+      var inner = sim.brands.length
+        ? sim.brands.map(function (b, i) {
+            return '<span class="chip">' + b + '<i data-rmb="' + i + '">&times;</i></span>';
+          }).join('')
+        : '<span class="ph">请选择品牌</span>';
+      return '<div class="msel' + (sim.brands.length ? ' on' : '') + '" id="brandField">' + inner +
+               '<svg class="caret" width="9" height="9" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4">' +
+                 '<path d="M2.5 4.5L6 8l3.5-3.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>';
+    }
+    if (sim.limit === 'product') {
+      var withPrice = (ctype() === 'voucher');
+      var gs = simGroups(), out = '';
+      gs.forEach(function (g, gi) {
+        var chips = g.items.map(function (p, k) {
+          return '<span class="pchip" data-pickg="' + gi + '" title="' + esc(p.name + '（' + p.spec + '）') + '">' +
+                   '<span class="pc-t">' + p.name + '</span>' +
+                   '<i data-delc="' + gi + ':' + k + '">&times;</i></span>';
+        }).join('');
+        if (!g.items.length) chips = '<span class="pchip empty" data-pickg="' + gi + '">+ 选择商品</span>';
+        out += '<div class="pgrp' + (withPrice ? '' : ' nop') + '">' +
+                 '<div class="pchips">' + chips + '</div>' +
+                 (withPrice
+                   ? '<span class="pdprice">' +
+                       '<input class="tinp cutinp" data-cut="' + gi + '" style="width:52px;" value="' + esc(g.cut == null ? '' : g.cut) + '"' +
+                       ' title="' + (g.items.length > 1 ? ('这 ' + g.items.length + ' 个商品共用此优惠金额') : '该组优惠金额') + '">' +
+                       '<span class="unit">元</span></span>'
+                   : '') +
+                 '<span class="pdops"><a data-newg="' + gi + '">新增</a><a data-delg="' + gi + '">删除</a></span>' +
+               '</div>';
+      });
+      return out;
+    }
+    return '';
+  }
+  function renderSim(){
+    $('simLimT').textContent = simLimText();
+    $('simLim').classList.toggle('on', sim.limit !== 'all');
+    var showDetail = sim.limit !== 'all';
+    var d = $('cDetail');
+    d.style.display = showDetail ? '' : 'none';
+    d.classList.toggle('dgroups', sim.limit === 'product');
+    d.classList.toggle('wp', ctype() === 'voucher');
+    if (showDetail) d.innerHTML = detailHtml();
+    applyCols();
+    updateCutHints();
+  }
+
+  /* ---------- 优惠金额分配提示（代金券） ---------- */
+  function cutVals(){
+    return sim.groups.filter(function (g) { return g.items.length; }).map(function (g) {
+      var v = g.cut;
+      var n = (v === '' || v == null) ? null : parseFloat(v);
+      return (n == null || isNaN(n)) ? null : n;
+    });
+  }
+  function updateCutHints(){
+    var isV = (ctype() === 'voucher'), tip = $('cutTip');
+    if (!isV || sim.limit !== 'product') { tip.style.display = 'none'; return; }
+    tip.style.display = '';
+    var total = parseFloat($('amountInp').value) || 0;
+    var vals = cutVals();
+    var filled = vals.filter(function (v) { return v != null; });
+    var sum = filled.reduce(function (a, b) { return a + b; }, 0);
+    var emptyN = vals.length - filled.length;
+    var left = Math.max(0, total - sum);
+    var avg = emptyN ? (left / emptyN) : 0;
+    /* 回填 placeholder */
+    var inputs = document.querySelectorAll('#cDetail [data-cut]');
+    for (var i = 0; i < inputs.length; i++) {
+      inputs[i].placeholder = emptyN ? ('均分 ' + avg.toFixed(2)) : '0.00';
+    }
+    var cls = 'cuttip', txt;
+    if (sum > total + 0.001) {
+      cls += ' warn';
+      txt = '各组优惠金额合计 <b>¥' + sum.toFixed(2) + '</b> 已超过券面额 <b>¥' + total.toFixed(2) + '</b>';
+    } else if (!vals.length) {
+      txt = '尚未选择商品';
+    } else if (!filled.length) {
+      txt = '券面额 <b>¥' + total.toFixed(2) + '</b> 将平均分给 ' + vals.length + ' 组商品，每组共用 <b>¥' + avg.toFixed(2) + '</b>';
+    } else if (emptyN) {
+      txt = '已指定 <b>¥' + sum.toFixed(2) + '</b>，剩余 <b>¥' + left.toFixed(2) + '</b> 平均给 ' + emptyN + ' 组（每组共用 <b>¥' + avg.toFixed(2) + '</b>）';
+    } else {
+      txt = '已分配 <b>¥' + sum.toFixed(2) + '</b> ／ 券面额 <b>¥' + total.toFixed(2) + '</b>' +
+            (total > sum + 0.001 ? '，还有 ¥' + (total - sum).toFixed(2) + ' 未分配' : '');
+    }
+    tip.className = cls;
+    tip.innerHTML = txt;
+  }
+  function applyCols(){
+    var t = ctype(), isV = (t === 'voucher');
+    var cols, hs, span = 0;
+    if (sim.limit === 'product') {
+      if (isV) {
+        cols = [110, 150, 118, 0, 88, 84];
+        hs = ['单张优惠券', '使用条件', '商品限制', '指定商品', '优惠价格', '操作'];
+        span = 3;
+      } else {
+        cols = [110, 150, 160, 130, 0, 84];
+        hs = ['折扣', '金额上限', '使用条件', '商品限制', '指定商品', '操作'];
+        span = 2;
+      }
+    } else if (sim.limit === 'brand') {
+      cols = isV ? [150, 216, 170, 326] : [130, 150, 216, 160, 206];
+      hs = (isV ? ['单张优惠券'] : ['折扣', '金额上限']).concat(['使用条件', '商品限制', '指定品牌']);
+    } else {
+      cols = isV ? [150, 216, 190] : [130, 150, 216, 190];
+      hs = (isV ? ['单张优惠券'] : ['折扣', '金额上限']).concat(['使用条件', '商品限制']);
+    }
+    var flex = cols.indexOf(0) > -1;
+    $('sWrap').style.setProperty('--rcols', cols.map(function (n) { return n ? n + 'px' : '1fr'; }).join(' '));
+    $('sWrap').style.width = flex ? '100%' : cols.reduce(function (a, b) { return a + b; }, 0) + 'px';
+    $('sHead').innerHTML = hs.map(function (h) { return '<span>' + h + '</span>'; }).join('');
+    var d = $('cDetail');
+    d.classList.toggle('span2', span === 2);
+    d.classList.toggle('span3', span === 3);
+  }
+
+  $('simLim').addEventListener('click', function (e) {
+    e.stopPropagation();
+    openMenuFor({ kind:'sim' }, sim.limit, $('simLim'));
+  });
+  $('cDetail').addEventListener('click', function (e) {
+    var rmb = e.target.closest('[data-rmb]');
+    if (rmb) {
+      e.stopPropagation();
+      sim.brands.splice(+rmb.dataset.rmb, 1);
+      if (!sim.brands.length) sim.limit = 'all';
+      renderSim();
+      closeBrandPop();
+      return;
+    }
+    var delc = e.target.closest('[data-delc]');
+    if (delc) {
+      e.stopPropagation();
+      var dc = delc.dataset.delc.split(':');
+      var dgi = +dc[0], dk = +dc[1];
+      if (sim.groups[dgi]) sim.groups[dgi].items.splice(dk, 1);
+      simGroups();
+      if (!simFlat().length) sim.limit = 'all';
+      renderSim();
+      return;
+    }
+    var del = e.target.closest('[data-delg]');
+    if (del) {
+      var gi = +del.dataset.delg;
+      sim.groups.splice(gi, 1);
+      simGroups();
+      if (!simFlat().length) sim.limit = 'all';
+      renderSim();
+      return;
+    }
+    if (e.target.closest('#brandField')) { openBrandPop(); return; }
+    var add = e.target.closest('[data-newg]');
+    if (add) {
+      sim.groups.splice(+add.dataset.newg + 1, 0, { items: [], cut: '' });
+      renderSim();
+      return;
+    }
+    var pick = e.target.closest('[data-pickg]');
+    if (pick) {
+      pickTarget = { kind:'simProdGroup', g: +pick.dataset.pickg };
+      openModal(false);
+      return;
+    }
+  });
+  $('cDetail').addEventListener('input', function (e) {
+    var ci = e.target.closest('[data-cut]');
+    if (!ci) return;
+    var g = sim.groups[+ci.dataset.cut];
+    if (g) g.cut = ci.value;
+    updateCutHints();
+  });
+  $('amountInp').addEventListener('input', updateCutHints);
+
+  function openProdModal(){
+    pickTarget = { kind:'simProdAll' };
+    openModal(false);
+  }
+
+  /* ---------- 品牌多选浮层 ---------- */
+  var bpTarget = { kind:'sim' };
+  function bpList(){
+    return bpTarget.kind === 'sim' ? sim.brands : state.box[bpTarget.i].brands;
+  }
+  function closeBrandPop(){ $('bmpop').classList.remove('open'); }
+  function openBrandPop(target){
+    if (target) bpTarget = target;
+    var list = bpList();
+    var html = BRANDS.map(function (b) {
+      var on = list.indexOf(b) > -1;
+      return '<label><input type="checkbox"' + (on ? ' checked' : '') + ' data-b="' + b + '">' +
+               '<span>' + b + '</span><span class="num">' + brandCount(b) + '</span></label>';
+    }).join('');
+    html += '<div class="bp-ft"><span>已选 ' + list.length + ' 个</span><a data-clear="1">清空</a></div>';
+    $('bmpop').innerHTML = html;
+    $('bmpop').classList.add('open');
+    var z = parseFloat(document.documentElement.style.zoom) || 1;
+    var anchor;
+    if (bpTarget.kind === 'boxRow') {
+      anchor = document.querySelector('#rtBody [data-bfield="' + bpTarget.i + '"]');
+    } else {
+      anchor = $('brandField');
+    }
+    anchor = anchor || document.querySelector('#rtBody .msel.mini.on') || document.querySelector('.msel.on') || document.querySelector('.msel');
+    var rect = anchor.getBoundingClientRect();
+    var left = rect.left;
+    if (left + 220 * z > window.innerWidth - 8) left = Math.max(8, window.innerWidth - 220 * z - 8);
+    var popH = $('bmpop').offsetHeight || 280;
+    var top = rect.bottom + 4;
+    if (top + popH * z > window.innerHeight - 8) top = Math.max(8, rect.top - popH * z - 4);
+    $('bmpop').style.left = (left / z) + 'px';
+    $('bmpop').style.top = (top / z) + 'px';
+  }
+  $('bmpop').addEventListener('change', function (e) {
+    var cb = e.target.closest('input[data-b]');
+    if (!cb || !bpTarget) return;
+    var b = cb.dataset.b, list = bpList();
+    if (cb.checked) { if (list.indexOf(b) < 0) list.push(b); }
+    else { var k = list.indexOf(b); if (k > -1) list.splice(k, 1); }
+    if (bpTarget.kind === 'sim') renderSim(); else renderTable();
+    openBrandPop();
+  });
+  $('bmpop').addEventListener('click', function (e) {
+    if (e.target.closest('[data-clear]')) {
+      var list = bpList();
+      list.length = 0;
+      if (bpTarget.kind === 'sim') { sim.limit = 'all'; renderSim(); }
+      else { state.box[bpTarget.i].limit = 'all'; renderTable(); }
+      closeBrandPop();
+      e.stopPropagation();
+      return;
+    }
+    if (e.target.tagName !== 'INPUT') e.stopPropagation();
+  });
+  document.addEventListener('click', function (e) {
+    if (!e.target.closest('#bmpop') && !e.target.closest('#brandField') && !e.target.closest('.msel.mini')) closeBrandPop();
+  });
+
+  /* ---------- 商品限制下拉菜单（字段 + 按箱行共用） ---------- */
+  var menuCtx = null;
+  function closeMenu(){ $('lmenu').classList.remove('open'); menuCtx = null; }
+  function openMenuFor(ctx, limit, el){
+    menuCtx = ctx;
+    var items = [['all','全部商品'],['brand','指定品牌'],['product','指定商品']];
+    $('lmenu').innerHTML = items.map(function (it) {
+      var on = limit === it[0];
+      return '<a data-lt="' + it[0] + '"><span class="ic">' + (on ? '&#10003;' : '') + '</span>' + it[1] + '</a>';
+    }).join('');
+    var menu = $('lmenu');
+    menu.classList.add('open');
+    var z = parseFloat(document.documentElement.style.zoom) || 1;
+    var rect = el.getBoundingClientRect();
+    var left = rect.left;
+    if (left + 130 * z > window.innerWidth - 8) left = Math.max(8, window.innerWidth - 130 * z - 8);
+    menu.style.left = (left / z) + 'px';
+    menu.style.top = ((rect.bottom + 4) / z) + 'px';
+  }
+  $('lmenu').addEventListener('click', function (e) {
+    var a = e.target.closest('a[data-lt]');
+    if (!a || !menuCtx) return;
+    var v = a.dataset.lt, ctx = menuCtx;
+    closeMenu();
+    if (ctx.kind === 'sim') {
+      if (v === 'all') { sim.limit = 'all'; renderSim(); return; }
+      if (v === 'brand') {
+        sim.limit = 'brand';
+        renderSim();
+        return;
+      }
+      sim.limit = 'product';
+      simGroups();
+      renderSim();
+      return;
+    }
+    var r = state[ctx.t][ctx.i];
+    if (v === 'all') { r.limit = 'all'; renderTable(); return; }
+    if (v === 'brand') { r.limit = 'brand'; renderTable(); return; }
+    r.limit = 'product';
+    renderTable();
+  });
+  document.addEventListener('click', function (e) {
+    if (!e.target.closest('#lmenu') && !e.target.closest('.lsel') && !e.target.closest('.fsel')) closeMenu();
+  });
+
+  /* ---------- 选择品牌弹窗（字段 / 按箱行共用） ---------- */
+  var bmTarget = null, bmSel = [];
+  function brandCount(b){
+    var n = 0;
+    DATA.forEach(function (p) { if (p.brand === b) n++; });
+    return n;
+  }
+  function openBrand(target){
+    bmTarget = target;
+    var brands = target.kind === 'sim' ? sim.brands : state[target.t][target.i].brands;
+    bmSel = brands.slice();
+    $('bmBody').innerHTML = BRANDS.map(function (b) {
+      var on = bmSel.indexOf(b) > -1;
+      return '<div class="bm-row' + (on ? ' on' : '') + '" data-b="' + b + '">' +
+               '<input type="checkbox"' + (on ? ' checked' : '') + '>' +
+               '<span>' + b + '</span><span class="num">' + brandCount(b) + '</span>' +
+             '</div>';
+    }).join('');
+    $('bmCnt').textContent = '已选 ' + bmSel.length + ' 个品牌';
+    $('bmMask').classList.add('open');
+  }
+  $('bmBody').addEventListener('click', function (e) {
+    var row = e.target.closest('.bm-row');
+    if (!row) return;
+    var b = row.dataset.b, cb = row.querySelector('input');
+    if (e.target !== cb) cb.checked = !cb.checked;
+    if (cb.checked) { if (bmSel.indexOf(b) < 0) bmSel.push(b); row.classList.add('on'); }
+    else { bmSel = bmSel.filter(function (x) { return x !== b; }); row.classList.remove('on'); }
+    $('bmCnt').textContent = '已选 ' + bmSel.length + ' 个品牌';
+  });
+  $('bmOk').onclick = function () {
+    if (bmTarget) {
+      if (bmTarget.kind === 'sim') {
+        sim.brands = bmSel.slice();
+        if (!sim.brands.length && sim.limit === 'brand') sim.limit = 'all';
+        renderSim();
+      } else {
+        var r = state[bmTarget.t][bmTarget.i];
+        r.brands = bmSel.slice();
+        r.limit = r.brands.length ? 'brand' : 'all';
+        refreshLimCell(bmTarget);
+      }
+    }
+    $('bmMask').classList.remove('open');
+  };
+  function closeBrand(){ $('bmMask').classList.remove('open'); }
+  $('bmCancel').onclick = closeBrand;
+  $('bmClose').onclick = closeBrand;
+  $('bmMask').onclick = function (e) { if (e.target === $('bmMask')) closeBrand(); };
+
+  function refreshLimCell(ctx){
+    var cell = document.querySelector('#rtBody .tier-row[data-i="' + ctx.i + '"] .lsel');
+    if (!cell) return;
+    var r = state[ctx.t][ctx.i];
+    cell.querySelector('.lsel-t').textContent = limLabel(r);
+    cell.classList.toggle('on', r.limit !== 'all');
+  }
+
+  /* ---------- 选择商品弹窗（行内多选 / 商品行单选） ---------- */
+  var pickTarget = null;
+
+  function openModal(single){
+    S.single = !!single;
+    if (pickTarget && pickTarget.kind === 'simProdAll') {
+      S.sel = simFlat().map(function (p) { return p.sku; });
+    } else if (pickTarget && pickTarget.kind === 'simProdGroup') {
+      var cg = sim.groups[pickTarget.g];
+      S.sel = cg ? cg.items.filter(Boolean).map(function (p) { return p.sku; }) : [];
+    } else if (pickTarget && pickTarget.kind === 'boxRowProd') {
+      S.sel = state.box[pickTarget.i].products.filter(Boolean).map(function (p) { return p.sku; });
+    } else if (pickTarget) {
+      var r = state[pickTarget.t][pickTarget.i];
+      S.sel = r.products.map(function (p) { return p.sku; });
+    } else S.sel = [];
+    S.lc = {}; S.rc = {};
+    S.fL = emptyF();
+    S.fR = emptyF();
+    clearF('pmL'); clearF('pmR');
+    if ($('pmSub')) {
+      $('pmSub').textContent = !pickTarget ? '未选与已选各自独立筛选'
+        : (pickTarget.kind === 'boxRowProd'
+            ? ('第 ' + (pickTarget.i + 1) + ' 档 · 可多选')
+            : (pickTarget.kind === 'simProdGroup'
+            ? ('第 ' + (pickTarget.g + 1) + ' 组 · 可多选，选中的商品共用该组优惠金额')
+            : (pickTarget.kind === 'simProdAll'
+                ? '可多选，回填到「商品限制」明细'
+                : ('第 ' + (pickTarget.i + 1) + ' 行 · 未选与已选各自独立筛选'))));
+    }
+    render();
+    $('pmMask').classList.add('open');
+  }
+  function closeModal(){
+    $('pmMask').classList.remove('open');
+    pickTarget = null;
+  }
+
+  $('pmClose').onclick = closeModal;
+  $('pmCancel').onclick = closeModal;
+  $('pmMask').onclick = function (e) { if (e.target === $('pmMask')) closeModal(); };
+  $('pmOk').onclick = function () {
+    /* 多选模式：勾选即生效，确定时把左栏勾选项并入已选 */
+    if (!S.single) {
+      Object.keys(S.lc).forEach(function (sku) { if (S.sel.indexOf(sku) < 0) S.sel.push(sku); });
+      S.lc = {};
+    }
+    if (pickTarget && pickTarget.kind === 'boxRowProd') {
+      var bpick2 = S.sel.map(bySku).filter(Boolean);
+      state.box[pickTarget.i].products = bpick2;
+      renderTable();
+    } else if (pickTarget && (pickTarget.kind === 'simProdGroup' || pickTarget.kind === 'simProdAll')) {
+      var picked = S.sel.map(bySku).filter(Boolean);
+      if (pickTarget.kind === 'simProdAll') {
+        sim.groups = picked.length ? [{ items: picked, cut: '' }] : [];
+      } else if (sim.groups[pickTarget.g]) {
+        sim.groups[pickTarget.g].items = picked;
+      }
+      simGroups();
+      if (!simFlat().length) sim.limit = 'all';
+      renderSim();
+    } else if (pickTarget) {
+      var r = state[pickTarget.t][pickTarget.i];
+      r.products = S.sel.map(bySku).filter(Boolean);
+      r.limit = r.products.length ? 'product' : 'all';
+      refreshLimCell(pickTarget);
+    }
+    pickTarget = null;
+    closeModal();
+  };
+
+  /* ---------- 类型切换 ---------- */
+
+  function switchType(){
+    var t = ctype();
+    $('blk-simple').style.display = (t === 'box') ? 'none' : '';
+    $('blk-box').style.display = (t === 'box') ? '' : 'none';
+    if (t !== 'box') {
+      $('cAmount').style.display = (t === 'voucher') ? '' : 'none';
+      $('cRate').style.display = (t === 'discount') ? '' : 'none';
+      $('cCap').style.display = (t === 'discount') ? '' : 'none';
+      $('sTip').innerHTML = (t === 'voucher')
+        ? '商品限制选「指定品牌」或「指定商品」后，右侧出现对应明细列，可逐条新增；留「全部商品」则对所有商品生效。'
+        : '商品限制选「指定品牌」或「指定商品」后，右侧出现对应明细列，可逐条新增；金额上限留空表示不封顶。';
+      renderSim();
+    }
+    if (t === 'box') renderTable();
+  }
+
+  /* ---------- 保存校验 ---------- */
+  $('saveBtn').addEventListener('click', function () {
+    var t = ctype(), toast = window.__toast, mark = window.__mark;
+
+    if (t !== 'box') {
+      if (sim.limit === 'brand' && !sim.brands.length) return toast('请选择品牌');
+      if (sim.limit === 'product') {
+        if (!simFlat().length) return toast('请选择商品');
+        if (sim.groups.some(function (g) { return !g.items.length; })) return toast('请选择商品（有未选择的行）');
+      }
+      var cv = parseFloat($('condInp').value);
+      if (!$('condInp').value.trim()) { mark($('condInp')); return toast('请填写使用条件'); }
+      if (isNaN(cv) || cv < 0) { mark($('condInp')); return toast('使用条件需为不小于 0 的数字'); }
+      if (t === 'voucher') {
+        var av = $('amountInp').value.trim(), an = parseFloat(av);
+        if (!av) { mark($('amountInp')); return toast('请填写单张优惠券金额'); }
+        if (isNaN(an) || an <= 0) { mark($('amountInp')); return toast('单张优惠券金额需大于 0'); }
+        if (!/^\d+(\.\d{1,2})?$/.test(av)) { mark($('amountInp')); return toast('金额最多保留两位小数'); }
+        if (sim.limit === 'product') {
+          var sum = 0;
+          for (var gi2 = 0; gi2 < sim.groups.length; gi2++) {
+            var g2 = sim.groups[gi2];
+            if (!g2.items.length) continue;
+            var raw = g2.cut;
+            if (raw === '' || raw == null) continue;
+            if (!/^\d+(\.\d{1,2})?$/.test(String(raw).trim())) {
+              mark(document.querySelector('#cDetail [data-cut="' + gi2 + '"]'));
+              return toast('第 ' + (gi2 + 1) + ' 组的优惠金额格式不对（最多两位小数）');
+            }
+            sum += parseFloat(raw);
+          }
+          if (sum > an + 0.001) { return toast('各组优惠金额合计 ¥' + sum.toFixed(2) + ' 已超过券面额 ¥' + an.toFixed(2)); }
+        }
+      } else {
+        var rv = $('rateInp').value.trim(), rn = parseFloat(rv);
+        if (!rv) { mark($('rateInp')); return toast('请填写折扣'); }
+        if (isNaN(rn) || rn <= 0 || rn > 100) { mark($('rateInp')); return toast('折扣需为不大于 100 的正数'); }
+        var cp = $('capInp').value.trim();
+        if (cp && (isNaN(parseFloat(cp)) || parseFloat(cp) <= 0)) { mark($('capInp')); return toast('金额上限需大于 0 或留空'); }
+      }
+    }
+
+    if (t === 'box') {
+      var rows = state.box;
+      if (!rows.length) return toast('请至少添加一档优惠规则');
+      var prevMap = {};
+      for (var i = 0; i < rows.length; i++) {
+        var r = rows[i];
+        var rowEl = document.querySelector('#rtBody .tier-row[data-i="' + i + '"]');
+        var q = function (f) { return rowEl ? rowEl.querySelector('[data-f="' + f + '"]') : null; };
+        if (r.limit === 'brand' && !r.brands.length) return toast('第 ' + (i + 1) + ' 行：请选择品牌');
+        if (r.limit === 'product') {
+          if (!r.products.filter(Boolean).length) return toast('第 ' + (i + 1) + ' 档：请选择商品');
+          if (r.products.some(function (x) { return !x; })) return toast('第 ' + (i + 1) + ' 档：有未选择商品的行');
+        }
+        var sv = parseInt(r.from, 10), ev = parseInt(r.to, 10);
+        var cut = parseFloat(r.cut), max = parseFloat(r.max);
+        if (isNaN(sv) || isNaN(ev)) { mark(q('from')); return toast('第 ' + (i + 1) + ' 行：请填写下单数区间'); }
+        if (sv <= 0 || ev < sv) { mark(q('to')); return toast('第 ' + (i + 1) + ' 行：结束箱数需大于等于起始箱数'); }
+        var key = r.limit + '|' + r.brands.join(',') + '|' + r.products.filter(Boolean).map(function (p) { return p.sku; }).join(',');
+        if (sv <= (prevMap[key] || 0)) { mark(q('from')); return toast('第 ' + (i + 1) + ' 行：同一商品限制下，起始箱数需大于上一档结束箱数'); }
+        if (isNaN(cut) || cut <= 0) { mark(q('cut')); return toast('第 ' + (i + 1) + ' 行：每档优惠需大于 0'); }
+        if (isNaN(max) || max < cut) { mark(q('max')); return toast('第 ' + (i + 1) + ' 行：最高封顶不能小于每档优惠'); }
+        prevMap[key] = ev;
+      }
+    }
+
+    toast('校验通过，已保存');
+  });
+
+  /* ---------- 初始化 ---------- */
+  switchType();
+
+  window.RT = {
+    render: switchType,
+    state: state,
+    sim: sim,
+    ctype: ctype,
+    data: DATA
+  };
+})();
+</script>
+
+
+</body>
+</html>
