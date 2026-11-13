@@ -367,11 +367,8 @@
   .drow.sm .dops a[data-bdel]{color:var(--text3);}
   .drow.sm .dops a[data-bdel]:hover{color:#e54545;}
   .drow{display:flex;align-items:center;gap:8px;height:26px;font-size:12px;color:var(--text);}
-  /* 明细：每组一行，商品以标签平铺（不再一行一个商品） */
+  /* 明细：所选商品以标签平铺（整张券统一生效，无分组、无单品优惠价） */
   #cDetail.dgroups{display:flex;flex-direction:column;padding:3px 0;}
-  .pgrp{display:grid;grid-template-columns:1fr 88px 84px;align-items:stretch;padding:4px 0;}
-  .pgrp.nop{grid-template-columns:1fr 84px;}
-  .pgrp + .pgrp{border-top:1px dashed #e8ebef;}
   .pflat{padding:3px 0;}
   .pchips{display:flex;flex-wrap:wrap;gap:4px;padding:2px 8px;min-height:24px;align-content:flex-start;}
   .pchip{
@@ -385,11 +382,6 @@
   .pchip i:hover{color:#e54545;}
   .pchip.empty{background:#f7f9fc;color:var(--text3);border:1px dashed var(--border);}
   .pchip.empty:hover{color:var(--blue);border-color:#bcd3f5;background:#f2f7ff;}
-  .pdprice{display:flex;align-items:flex-start;justify-content:flex-end;gap:4px;padding:2px 8px;min-height:26px;border-left:1px dashed #dfe3e9;}
-  .pdops{display:flex;align-items:flex-start;justify-content:center;gap:10px;min-height:26px;padding-top:7px;border-left:1px dashed #dfe3e9;}
-  .pdops a{color:var(--blue);font-size:11px;cursor:pointer;}
-  .pdops a[data-delg]{color:var(--text3);}
-  .pdops a[data-delg]:hover{color:#e54545;}
   .drow.prod{display:grid;grid-template-columns:1fr 84px 74px;align-items:center;column-gap:6px;}
   .drow.prod.withprice{grid-template-columns:1fr 84px 74px 92px;}
   .drow.prod .dt{min-width:0;}
@@ -398,11 +390,6 @@
   .drow.prod .dprice{display:flex;align-items:center;gap:4px;justify-content:flex-end;}
   .drow.prod .dprice .unit{font-size:11px;color:var(--text3);}
   .drow.prod .dprice .auto-ph{font-size:11px;color:var(--text4);}
-  .cutinp{height:24px;font-size:12px;}
-  .cuttip{margin-top:8px;font-size:12px;color:var(--text3);line-height:20px;max-width:862px;}
-  .cuttip b{color:var(--text);font-weight:600;}
-  .cuttip.warn{color:#d4380d;}
-  .cuttip.warn b{color:#d4380d;}
   .drow.prod .dops a{color:var(--blue);cursor:pointer;font-size:12px;}
   .drow.prod .dops a:hover{text-decoration:underline;}
   .drow.prod .dops a[data-del]{color:var(--text3);}
@@ -1043,8 +1030,6 @@
                   <div class="cell dcell" id="cDetail" style="display:none;"></div>
                 </div>
               </div>
-              <div class="cuttip" id="cutTip" style="display:none;"></div>
-              <div class="tier-tip" id="sTip"></div>
             </div>
           </div>
         </div>
@@ -1662,12 +1647,13 @@
   /* =======================================================
      优惠规则
      · 代金券/折扣券：字段式（商品限制字段 + 单值金额/条件 +
-       商品多行小表格，每行一个商品，「新增」只加商品行）
+       商品标签平铺多选，整张券对所选商品统一生效，
+       不支持按单品设置不同优惠价）
      · 按箱优惠：阶梯表格（行内含商品限制，按商品分组校验区间）
      ======================================================= */
   var state = { box: [] };                        // 按箱阶梯行
   /* 代金券 / 折扣券：单组配置 */
-  var sim = { limit:'all', brands:[], groups:[] };  // groups: [{items:[商品], cut:''}] 一次多选=一组，组内共用优惠金额
+  var sim = { limit:'all', brands:[], groups:[] };  // groups: [{items:[商品]}] 单一商品集合，不再按组分配优惠金额
 
   function ctype(){
     var el = document.querySelector('input[name=ctype]:checked');
@@ -1811,7 +1797,7 @@
 
   /* ---------- 代金券 / 折扣券：单组规则 + 动态明细列 ---------- */
   function simGroups(){
-    if (!sim.groups.length) sim.groups.push({ items: [], cut: '' });
+    if (!sim.groups.length) sim.groups.push({ items: [] });
     return sim.groups;
   }
   function simFlat(){
@@ -1839,40 +1825,19 @@
                  '<path d="M2.5 4.5L6 8l3.5-3.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>';
     }
     if (sim.limit === 'product') {
-      var withPrice = (ctype() === 'voucher');
+      /* 代金券 / 折扣券一致：优惠对整张券所选商品统一生效 → 单一扁平多选区，无分组、无「新增/删除」、无单品优惠价 */
       var gs = simGroups();
-      /* 折扣券：折扣与上限对全部指定商品一致，分组无意义 → 单一扁平多选区，无「新增/删除」 */
-      if (!withPrice) {
-        var flatItems = [];
-        gs.forEach(function (g, gi) {
-          g.items.forEach(function (p, k) { flatItems.push({ p: p, gi: gi, k: k }); });
-        });
-        var flat = flatItems.map(function (o) {
-          return '<span class="pchip" data-pickg="0" data-pickall="1" title="' + esc(o.p.name + '（' + o.p.spec + '）') + '">' +
-                   '<span class="pc-t">' + o.p.name + '</span>' +
-                   '<i data-delc="' + o.gi + ':' + o.k + '">&times;</i></span>';
-        }).join('');
-        if (!flat) flat = '<span class="pchip empty" data-pickg="0" data-pickall="1">+ 选择商品</span>';
-        return '<div class="pflat"><div class="pchips">' + flat + '</div></div>';
-      }
-      var out = '';
+      var flatItems = [];
       gs.forEach(function (g, gi) {
-        var chips = g.items.map(function (p, k) {
-          return '<span class="pchip" data-pickg="' + gi + '" title="' + esc(p.name + '（' + p.spec + '）') + '">' +
-                   '<span class="pc-t">' + p.name + '</span>' +
-                   '<i data-delc="' + gi + ':' + k + '">&times;</i></span>';
-        }).join('');
-        if (!g.items.length) chips = '<span class="pchip empty" data-pickg="' + gi + '">+ 选择商品</span>';
-        out += '<div class="pgrp">' +
-                 '<div class="pchips">' + chips + '</div>' +
-                 '<span class="pdprice">' +
-                   '<input class="tinp cutinp" data-cut="' + gi + '" style="width:52px;" value="' + esc(g.cut == null ? '' : g.cut) + '"' +
-                   ' title="' + (g.items.length > 1 ? ('这 ' + g.items.length + ' 个商品共用此优惠金额') : '该组优惠金额') + '">' +
-                   '<span class="unit">元</span></span>' +
-                 '<span class="pdops"><a data-newg="' + gi + '">新增</a><a data-delg="' + gi + '">删除</a></span>' +
-               '</div>';
+        g.items.forEach(function (p, k) { flatItems.push({ p: p, gi: gi, k: k }); });
       });
-      return out;
+      var flat = flatItems.map(function (o) {
+        return '<span class="pchip" data-pickg="0" data-pickall="1" title="' + esc(o.p.name + '（' + o.p.spec + '）') + '">' +
+                 '<span class="pc-t">' + o.p.name + '</span>' +
+                 '<i data-delc="' + o.gi + ':' + o.k + '">&times;</i></span>';
+      }).join('');
+      if (!flat) flat = '<span class="pchip empty" data-pickg="0" data-pickall="1">+ 选择商品</span>';
+      return '<div class="pflat"><div class="pchips">' + flat + '</div></div>';
     }
     return '';
   }
@@ -1883,67 +1848,23 @@
     var d = $('cDetail');
     d.style.display = showDetail ? '' : 'none';
     d.classList.toggle('dgroups', sim.limit === 'product');
-    d.classList.toggle('wp', ctype() === 'voucher');
     if (showDetail) d.innerHTML = detailHtml();
     applyCols();
-    updateCutHints();
   }
 
-  /* ---------- 优惠金额分配提示（代金券） ---------- */
-  function cutVals(){
-    return sim.groups.filter(function (g) { return g.items.length; }).map(function (g) {
-      var v = g.cut;
-      var n = (v === '' || v == null) ? null : parseFloat(v);
-      return (n == null || isNaN(n)) ? null : n;
-    });
-  }
-  function updateCutHints(){
-    var isV = (ctype() === 'voucher'), tip = $('cutTip');
-    if (!isV || sim.limit !== 'product') { tip.style.display = 'none'; return; }
-    tip.style.display = '';
-    var total = parseFloat($('amountInp').value) || 0;
-    var vals = cutVals();
-    var filled = vals.filter(function (v) { return v != null; });
-    var sum = filled.reduce(function (a, b) { return a + b; }, 0);
-    var emptyN = vals.length - filled.length;
-    var left = Math.max(0, total - sum);
-    var avg = emptyN ? (left / emptyN) : 0;
-    /* 回填 placeholder */
-    var inputs = document.querySelectorAll('#cDetail [data-cut]');
-    for (var i = 0; i < inputs.length; i++) {
-      inputs[i].placeholder = emptyN ? ('均分 ' + avg.toFixed(2)) : '0.00';
-    }
-    var cls = 'cuttip', txt;
-    if (sum > total + 0.001) {
-      cls += ' warn';
-      txt = '各组优惠金额合计 <b>¥' + sum.toFixed(2) + '</b> 已超过券面额 <b>¥' + total.toFixed(2) + '</b>';
-    } else if (!vals.length) {
-      txt = '尚未选择商品';
-    } else if (!filled.length) {
-      txt = '券面额 <b>¥' + total.toFixed(2) + '</b> 将平均分给 ' + vals.length + ' 组商品，每组共用 <b>¥' + avg.toFixed(2) + '</b>';
-    } else if (emptyN) {
-      txt = '已指定 <b>¥' + sum.toFixed(2) + '</b>，剩余 <b>¥' + left.toFixed(2) + '</b> 平均给 ' + emptyN + ' 组（每组共用 <b>¥' + avg.toFixed(2) + '</b>）';
-    } else {
-      txt = '已分配 <b>¥' + sum.toFixed(2) + '</b> ／ 券面额 <b>¥' + total.toFixed(2) + '</b>' +
-            (total > sum + 0.001 ? '，还有 ¥' + (total - sum).toFixed(2) + ' 未分配' : '');
-    }
-    tip.className = cls;
-    tip.innerHTML = txt;
-  }
   function applyCols(){
     var t = ctype(), isV = (t === 'voucher');
     var cols, hs, span = 0;
     if (sim.limit === 'product') {
+      /* 代金券 / 折扣券：整张券统一作用于所选商品，不分组、不设单品优惠价，故无「优惠价格」「操作」列 */
       if (isV) {
-        cols = [110, 150, 118, 0, 88, 84];
-        hs = ['单张优惠券', '使用条件', '商品限制', '指定商品', '优惠价格', '操作'];
-        span = 3;
+        cols = [110, 150, 160, 0];
+        hs = ['单张优惠券', '使用条件', '商品限制', '指定商品'];
       } else {
-        /* 折扣券：不分组，故无「操作」列 */
         cols = [110, 150, 160, 130, 0];
         hs = ['折扣', '金额上限', '使用条件', '商品限制', '指定商品'];
-        span = 0;
       }
+      span = 0;
     } else if (sim.limit === 'brand') {
       cols = isV ? [150, 216, 170, 326] : [130, 150, 216, 160, 206];
       hs = (isV ? ['单张优惠券'] : ['折扣', '金额上限']).concat(['使用条件', '商品限制', '指定品牌']);
@@ -1985,38 +1906,15 @@
       renderSim();
       return;
     }
-    var del = e.target.closest('[data-delg]');
-    if (del) {
-      var gi = +del.dataset.delg;
-      sim.groups.splice(gi, 1);
-      simGroups();
-      if (!simFlat().length) sim.limit = 'all';
-      renderSim();
-      return;
-    }
     if (e.target.closest('#brandField')) { openBrandPop(); return; }
-    var add = e.target.closest('[data-newg]');
-    if (add) {
-      sim.groups.splice(+add.dataset.newg + 1, 0, { items: [], cut: '' });
-      renderSim();
-      return;
-    }
     var pick = e.target.closest('[data-pickg]');
     if (pick) {
-      /* 折扣券的标签带 data-pickall：整块替换（不分组的单一商品集合） */
+      /* 代金券 / 折扣券一致：标签带 data-pickall，整块替换（不分组的单一商品集合） */
       pickTarget = pick.dataset.pickall ? { kind:'simProdAll' } : { kind:'simProdGroup', g: +pick.dataset.pickg };
       openModal(false);
       return;
     }
   });
-  $('cDetail').addEventListener('input', function (e) {
-    var ci = e.target.closest('[data-cut]');
-    if (!ci) return;
-    var g = sim.groups[+ci.dataset.cut];
-    if (g) g.cut = ci.value;
-    updateCutHints();
-  });
-  $('amountInp').addEventListener('input', updateCutHints);
 
   function openProdModal(){
     pickTarget = { kind:'simProdAll' };
@@ -2230,7 +2128,7 @@
     } else if (pickTarget && (pickTarget.kind === 'simProdGroup' || pickTarget.kind === 'simProdAll')) {
       var picked = S.sel.map(bySku).filter(Boolean);
       if (pickTarget.kind === 'simProdAll') {
-        sim.groups = picked.length ? [{ items: picked, cut: '' }] : [];
+        sim.groups = picked.length ? [{ items: picked }] : [];
       } else if (sim.groups[pickTarget.g]) {
         sim.groups[pickTarget.g].items = picked;
       }
@@ -2257,9 +2155,6 @@
       $('cAmount').style.display = (t === 'voucher') ? '' : 'none';
       $('cRate').style.display = (t === 'discount') ? '' : 'none';
       $('cCap').style.display = (t === 'discount') ? '' : 'none';
-      $('sTip').innerHTML = (t === 'voucher')
-        ? '商品限制选「指定商品」后，右侧出现明细列，可分组新增、每组共用一笔优惠金额；全部商品则对所有商品生效。'
-        : '商品限制选「指定商品」后，右侧出现明细列，一次多选即可（折扣对所选商品统一生效）；金额上限留空表示不封顶。';
       renderSim();
     }
     if (t === 'box') renderTable();
@@ -2271,10 +2166,7 @@
 
     if (t !== 'box') {
       if (sim.limit === 'brand' && !sim.brands.length) return toast('请选择品牌');
-      if (sim.limit === 'product') {
-        if (!simFlat().length) return toast('请选择商品');
-        if (t === 'voucher' && sim.groups.some(function (g) { return !g.items.length; })) return toast('请选择商品（有未选择的行）');
-      }
+      if (sim.limit === 'product' && !simFlat().length) return toast('请选择商品');
       var cv = parseFloat($('condInp').value);
       if (!$('condInp').value.trim()) { mark($('condInp')); return toast('请填写使用条件'); }
       if (isNaN(cv) || cv < 0) { mark($('condInp')); return toast('使用条件需为不小于 0 的数字'); }
@@ -2283,21 +2175,6 @@
         if (!av) { mark($('amountInp')); return toast('请填写单张优惠券金额'); }
         if (isNaN(an) || an <= 0) { mark($('amountInp')); return toast('单张优惠券金额需大于 0'); }
         if (!/^\d+(\.\d{1,2})?$/.test(av)) { mark($('amountInp')); return toast('金额最多保留两位小数'); }
-        if (sim.limit === 'product') {
-          var sum = 0;
-          for (var gi2 = 0; gi2 < sim.groups.length; gi2++) {
-            var g2 = sim.groups[gi2];
-            if (!g2.items.length) continue;
-            var raw = g2.cut;
-            if (raw === '' || raw == null) continue;
-            if (!/^\d+(\.\d{1,2})?$/.test(String(raw).trim())) {
-              mark(document.querySelector('#cDetail [data-cut="' + gi2 + '"]'));
-              return toast('第 ' + (gi2 + 1) + ' 组的优惠金额格式不对（最多两位小数）');
-            }
-            sum += parseFloat(raw);
-          }
-          if (sum > an + 0.001) { return toast('各组优惠金额合计 ¥' + sum.toFixed(2) + ' 已超过券面额 ¥' + an.toFixed(2)); }
-        }
       } else {
         var rv = $('rateInp').value.trim(), rn = parseFloat(rv);
         if (!rv) { mark($('rateInp')); return toast('请填写折扣'); }
